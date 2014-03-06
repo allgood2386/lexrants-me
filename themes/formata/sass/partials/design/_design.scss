@@ -92,6 +92,7 @@ pre {
   overflow: scroll;
   @include typecsset-font-size(12px);
   @include typecsset-space(margin-bottom);
+  border-radius: 5px;
 
   table {
   margin: 0;
