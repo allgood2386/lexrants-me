@@ -3,7 +3,7 @@
  * @file
  * Style Imports.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/toolkit-1\.3\.8\/stylesheets\/toolkit\/_box-sizing\.scss}line{font-family:\0000336}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/toolkit-1\.3\.8\/stylesheets\/toolkit\/_box-sizing\.scss}line{font-family:\0000336}}
 *, *:after, *:before {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -11,13 +11,13 @@
   *behavior: url('../behaviors/box-sizing/boxsizing.php');
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/toolkit-1\.3\.8\/stylesheets\/toolkit\/_fluid-media\.scss}line{font-family:\000034}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/toolkit-1\.3\.8\/stylesheets\/toolkit\/_fluid-media\.scss}line{font-family:\000034}}
 img, video {
   max-width: 100%;
   height: auto;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000317}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000317}}
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -39,45 +39,45 @@ time, mark, audio, video {
   vertical-align: baseline;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000322}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000322}}
 html {
   line-height: 1;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000324}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000324}}
 ol, ul {
   list-style: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000326}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000326}}
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000328}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000328}}
 caption, th, td {
   text-align: left;
   font-weight: normal;
   vertical-align: middle;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000330}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000330}}
 q, blockquote {
   quotes: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\00003103}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\00003103}}
 q:before, q:after, blockquote:before, blockquote:after {
   content: "";
   content: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000332}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\0000332}}
 a img {
   border: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\00003116}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/compass-0\.12\.2\/frameworks\/compass\/stylesheets\/compass\/reset\/_utilities\.scss}line{font-family:\00003116}}
 article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section, summary {
   display: block;
 }
@@ -100,13 +100,13 @@ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, 
  * A lot of elements in Typecsset need to share some declarations (mainly for
  * vertical rhythm), so we `@extend` some silent classes.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003100}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003100}}
 h1, h2, h3, h4, h5, h6, .content ul, .content ol, dd, p, address, pre, blockquote, table {
   margin: 0;
   padding: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003105}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003105}}
 h1, h2, h3, h4, h5, h6, .content ul, .content ol, dd, p, address, pre, blockquote, table {
   margin-bottom: 24px;
   margin-bottom: 1.5rem;
@@ -122,7 +122,7 @@ h1, h2, h3, h4, h5, h6, .content ul, .content ol, dd, p, address, pre, blockquot
  *    desired `line-height` (defined previously in pixels), and your project’s
  *    base font size.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003132}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003132}}
 html {
   font-size: 1em;
   /* [1] */
@@ -130,7 +130,7 @@ html {
   /* [2] */
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003146}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003146}}
 body {
   margin: 0;
 }
@@ -138,42 +138,42 @@ body {
 /*------------------------------------*\
     #HEADINGS
 \*------------------------------------*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003157}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003157}}
 h1 {
   font-size: 48px;
   font-size: 3rem;
   line-height: 1;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003162}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003162}}
 h2 {
   font-size: 36px;
   font-size: 2.25rem;
   line-height: 1.33333;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003167}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003167}}
 h3 {
   font-size: 30px;
   font-size: 1.875rem;
   line-height: 1.6;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003172}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003172}}
 h4 {
   font-size: 24px;
   font-size: 1.5rem;
   line-height: 1;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003177}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003177}}
 h5 {
   font-size: 20px;
   font-size: 1.25rem;
   line-height: 1.2;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003182}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003182}}
 h6 {
   font-size: 18px;
   font-size: 1.125rem;
@@ -183,13 +183,13 @@ h6 {
 /*------------------------------------*\
     #LISTS
 \*------------------------------------*/
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003194}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003194}}
 .content ul, .content ol, dd {
   margin-left: 48px;
   margin-left: 3rem;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003200}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003200}}
 li > ul,
 li > ol {
   margin-bottom: 0;
@@ -208,7 +208,7 @@ li > ol {
  * 1. Fix an odd quirk whereby, without this, code blocks are rendered at a
  *    font-size smaller than 1em.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003251}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003251}}
 code,
 kbd,
 pre,
@@ -223,7 +223,7 @@ samp {
 /**
  * 1. Hang the opening quote of the blockquote.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003265}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003265}}
 blockquote {
   text-indent: -0.41em;
   /* [1] */
@@ -233,56 +233,56 @@ blockquote {
  * Set up quote marks on quoting elements. This is very English-based, so we are
  * using “, ”, ‘, and ’ quotes.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003273}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003273}}
 blockquote {
   quotes: "“" "”";
   margin-left: 48px;
   margin-left: 3rem;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003280}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003280}}
 blockquote p:before {
   content: "“";
   content: open-quote;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003285}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003285}}
 blockquote p:after {
   content: "";
   content: no-close-quote;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003290}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003290}}
 blockquote p:last-of-type:after {
   content: "”";
   content: close-quote;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003299}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003299}}
 q {
   quotes: "‘" "’" "“" "”";
   /**
    * If an element opens with an inline quote, let’s hang that.
    */
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003302}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003302}}
 q:before {
   content: "‘";
   content: open-quote;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003307}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003307}}
 q:after {
   content: "’";
   content: close-quote;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003312}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003312}}
 q q:before {
   content: "“";
   content: open-quote;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003317}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003317}}
 q q:after {
   content: "”";
   content: close-quote;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003325}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003325}}
 q:first-child {
   display: inline-block;
   text-indent: -0.22em;
@@ -294,14 +294,14 @@ q:first-child {
 /**
  * Crude table styles; tables are very difficult to keep on the baseline.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003342}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003342}}
 table {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003350}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/global\/_typecsset\.scss}line{font-family:\00003350}}
 th,
 td {
   padding: 12px;
@@ -315,12 +315,12 @@ td {
  * @file
  * Layout elements.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\000036}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\000036}}
 html, body {
   height: 100%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000312}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000312}}
 #sidebar {
   position: relative;
   top: 0;
@@ -329,7 +329,7 @@ html, body {
   background: #3498db;
 }
 @media (min-width: 700px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000312}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000312}}
   #sidebar {
     width: 22.58065%;
     float: left;
@@ -341,7 +341,7 @@ html, body {
   }
 }
 @media (min-width: 1200px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000312}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000312}}
   #sidebar {
     width: 17.94872%;
     float: left;
@@ -353,28 +353,28 @@ html, body {
   }
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000332}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000332}}
 .region-sidebar {
   display: inline;
   width: 100%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000337}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000337}}
 .region-sidebar {
   display: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000339}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000339}}
 .region-sidebar .social {
   display: inline-block;
   margin: 0 2% 0 0;
   color: #1d6fa5;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000343}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000343}}
 .region-sidebar .social:hover {
   color: white;
 }
 @media (min-width: 700px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000337}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000337}}
   .region-sidebar {
     display: block;
     position: absolute;
@@ -387,14 +387,14 @@ html, body {
   }
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000359}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000359}}
 #main-content {
   padding: 2em 1em;
   min-height: 100%;
   position: relative;
 }
 @media (min-width: 700px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000359}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000359}}
   #main-content {
     width: 61.29032%;
     float: left;
@@ -405,7 +405,7 @@ html, body {
   }
 }
 @media (min-width: 1200px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000359}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000359}}
   #main-content {
     width: 69.23077%;
     float: left;
@@ -416,12 +416,12 @@ html, body {
   }
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000374}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000374}}
 #content {
   padding-bottom: 80px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000378}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/layout\/_layout\.scss}line{font-family:\0000378}}
 #footer {
   margin: -80px 0 0 0;
   padding: 1em 0;
@@ -436,17 +436,17 @@ html, body {
  * @file
  * Design elements.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\000037}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\000037}}
 #sidebar .branding {
   padding: 1em;
 }
 @media (min-width: 700px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\000037}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\000037}}
   #sidebar .branding {
     padding: 3em 10%;
   }
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000314}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000314}}
 #sidebar .logo {
   color: white;
   font-size: 26px;
@@ -456,11 +456,11 @@ html, body {
   font-family: "Merriweather Sans", sans-serif;
   text-transform: uppercase;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000320}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000320}}
 #sidebar .logo:hover {
   color: #164666;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000325}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000325}}
 #sidebar .slogan {
   color: #20638f;
   font-size: 16px;
@@ -470,12 +470,12 @@ html, body {
   font-weight: 300;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000333}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000333}}
 .views-row {
   padding: .5em 0;
   border-bottom: solid 1px #ecf0f1;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000336}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000336}}
 .views-row .views-field-title {
   margin: 0;
   font-size: 22px;
@@ -483,17 +483,17 @@ html, body {
   line-height: 1.09091;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000342}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000342}}
 a {
   color: #2980b9;
   text-decoration: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000345}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000345}}
 a:hover {
   color: #2472a4;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000350}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000350}}
 .button {
   text-align: center;
   font-size: 14px;
@@ -514,19 +514,19 @@ a:hover {
   color: white;
   font-family: "Merriweather Sans", sans-serif;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/sassy-buttons\/_sassy-button-pseudo-states\.sass}line{font-family:\0000315}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/sassy-buttons\/_sassy-button-pseudo-states\.sass}line{font-family:\0000315}}
 .button:hover {
   text-decoration: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/sassy-buttons\/_sassy-button-pseudo-states\.sass}line{font-family:\0000342}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/sassy-buttons\/_sassy-button-pseudo-states\.sass}line{font-family:\0000342}}
 .button:hover {
   background-color: #2472a4;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/sassy-buttons\/_sassy-button-pseudo-states\.sass}line{font-family:\0000344}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/sassy-buttons\/_sassy-button-pseudo-states\.sass}line{font-family:\0000344}}
 .button:active {
   background-color: #226998;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/sassy-buttons\/_sassy-button-pseudo-states\.sass}line{font-family:\000036}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/sassy-buttons\/_sassy-button-pseudo-states\.sass}line{font-family:\000036}}
 .button.disabled, .button[disabled] {
   opacity: 0.6;
   background: false;
@@ -535,17 +535,17 @@ a:hover {
   -moz-box-shadow: none;
   box-shadow: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/\.rbenv\/versions\/2\.0\.0-p353\/lib\/ruby\/gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/_sassy-buttons\.sass}line{font-family:\0000373}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Library\/Ruby\/Gems\/2\.0\.0\/gems\/sassy-buttons-0\.1\.4\/stylesheets\/_sassy-buttons\.sass}line{font-family:\0000373}}
 .button::-moz-focus-inner {
   padding: 0 !important;
   margin: -1px !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000355}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000355}}
 .button:hover {
   color: white;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000361}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000361}}
 #scrollUp {
   bottom: 20px;
   right: 20px;
@@ -554,7 +554,7 @@ a:hover {
   background: url(../img/top.png) no-repeat;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000371}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000371}}
 .tabs {
   margin: 0 0 2em 0;
   font-size: 14px;
@@ -562,19 +562,19 @@ a:hover {
   line-height: 1.71429;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000375}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000375}}
 .messages {
   margin-bottom: 1em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000380}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000380}}
 .link-wrapper ul,
 ul.inline li {
   margin: 0;
   padding: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000388}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000388}}
 pre {
   background: #272822;
   word-wrap: break-word;
@@ -585,109 +585,110 @@ pre {
   line-height: 2;
   margin-bottom: 48px;
   margin-bottom: 3rem;
+  border-radius: 5px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000396}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\0000397}}
 pre table {
   margin: 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003100}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003101}}
 pre th,
 pre td {
   padding: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003105}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003106}}
 pre, code {
   font-family: 'Monaco', courier, monospace;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003109}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003110}}
 pre .comment {
   color: #75715E;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003113}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003114}}
 pre .constant {
   color: #AE81FF;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003117}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003118}}
 pre .storage {
   color: #66D9EF;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003121}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003122}}
 pre .string, pre .comment.docstring {
   color: #E6DB74;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003125}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003126}}
 pre .support.tag {
   color: #fff;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003129}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003130}}
 pre .keyword {
   color: #F92672;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003133}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003134}}
 pre .selector {
   color: #F92672;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003137}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003138}}
 pre .inherited-class {
   font-style: italic;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003141}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003142}}
 pre .operator, pre .support.tag-name, pre .entity.tag {
   color: #F92672;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003145}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003146}}
 pre .entity, pre .support.attribute, pre .entity.attribute {
   color: #A6E22E;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003149}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003150}}
 pre .support, *[data-language="c"] .function.call {
   color: #66D9EF;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003153}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003154}}
 *[data-language="html"] .support.operator {
   color: #fff;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003157}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003158}}
 pre .css-property, pre .storage.function {
   font-style: italic;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003161}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003162}}
 pre .variable.global, pre .variable.class, pre .variable.instance {
   color: #A6E22E;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003168}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003169}}
 .rainbow {
   border-spacing: 0;
   border-collapse: collapse;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003172}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003173}}
 .rainbow .line:hover {
   background-color: #171b1c;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003175}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003176}}
 .rainbow .line:hover .line-number {
   background-color: #101313;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003178}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003179}}
 .rainbow .line .line-number {
   text-align: right;
   background-color: #1b2022;
@@ -696,12 +697,12 @@ pre .variable.global, pre .variable.class, pre .variable.instance {
   color: #bdc3c7;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003186}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003187}}
 .rainbow .line .line-number:before {
   content: attr(data-line-number);
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003189}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/design\/_design\.scss}line{font-family:\00003190}}
 .rainbow .line .line-code {
   width: 100%;
 }
@@ -710,15 +711,15 @@ pre .variable.global, pre .variable.class, pre .variable.instance {
  * @file
  * Navigation.
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\000037}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\000037}}
 #main-nav ul {
   border-top: 1px solid #2386c8;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\000039}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\000039}}
 #main-nav ul li {
   list-style-type: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000311}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000311}}
 #main-nav ul li a {
   display: block;
   padding: .5em 1em;
@@ -730,26 +731,26 @@ pre .variable.global, pre .variable.class, pre .variable.instance {
   letter-spacing: 1px;
   border-bottom: 1px solid #2386c8;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000320}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000320}}
 #main-nav ul li a:hover {
   background: #2b94d9;
   color: #e6e6e6;
 }
 @media (min-width: 700px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000311}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000311}}
   #main-nav ul li a {
     padding: .5em 10%;
   }
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000332}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000332}}
 .naver .naver-handle {
   cursor: pointer;
   display: none;
   user-select: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000338}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000338}}
 .naver .naver-handle:before {
   display: block;
   content: "\f039";
@@ -759,12 +760,12 @@ pre .variable.global, pre .variable.class, pre .variable.instance {
   line-height: 2.18182em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000345}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000345}}
 .naver .naver-wrapper {
   height: auto;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000348}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000348}}
 .naver .naver-container:after {
   clear: both;
   content: ".";
@@ -775,13 +776,13 @@ pre .variable.global, pre .variable.class, pre .variable.instance {
 }
 
 @media (min-width: 1200px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000357}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000357}}
   .naver .naver-wrapper {
     height: auto !important;
   }
 }
 @media screen and (max-width: 700px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000363}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000363}}
   .naver.active .naver-handle {
     display: block;
     position: absolute;
@@ -789,24 +790,24 @@ pre .variable.global, pre .variable.class, pre .variable.instance {
     right: 1em;
   }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000369}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000369}}
   .naver.active .naver-wrapper {
     height: 0px;
     overflow: hidden;
   }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000373}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000373}}
   .naver.animated .naver-wrapper {
     transition: height 0.2s ease-out;
   }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000376}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000376}}
   .naver.animated .naver-container {
     opacity: 0;
     transition: opacity 0.2s ease-out;
   }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000380}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/navigation\/_navigation\.scss}line{font-family:\0000380}}
   .naver.animated.open .naver-container {
     opacity: 1;
   }
@@ -815,92 +816,92 @@ pre .variable.global, pre .variable.class, pre .variable.instance {
  * @file
  * Typography
  */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\000037}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\000037}}
 body {
   font-family: "Merriweather", serif;
   font-weight: 300;
   color: #2c3e50;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000313}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000313}}
 h1, h2, h3, h4, h5, h6 {
   font-family: "Merriweather Sans", sans-serif;
   font-weight: 700;
   color: #34495e;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000319}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000319}}
 h1 {
   font-size: 42px;
   font-size: 2.625rem;
   line-height: 1.14286;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000323}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000323}}
 h2 {
   font-size: 30px;
   font-size: 1.875rem;
   line-height: 1.6;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000327}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000327}}
 h3 {
   font-size: 24px;
   font-size: 1.5rem;
   line-height: 1;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000331}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000331}}
 h4 {
   font-size: 20px;
   font-size: 1.25rem;
   line-height: 1.2;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000335}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000335}}
 h5 {
   font-size: 18px;
   font-size: 1.125rem;
   line-height: 1.33333;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000339}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000339}}
 h5 {
   font-size: 16px;
   font-size: 1rem;
   line-height: 1.5;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000347}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000347}}
 .content ul {
   list-style-position: inside;
   list-style-type: disc;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000351}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000351}}
 .content ol {
   list-style-position: inside;
   list-style-type: decimal;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000355}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000355}}
 strong, b {
   font-weight: 700;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000359}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000359}}
 em, i, q {
   font-style: italic;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000363}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000363}}
 blockquote {
   font-size: 20px;
   font-size: 1.25rem;
   line-height: 1.2;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000367}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000367}}
 hr {
   background: none;
   height: 1px;
@@ -910,7 +911,7 @@ hr {
 }
 
 @media screen and (max-width: 400px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/andrei\/Sites\/drupal8\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000375}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rallen\/Sites\/lexrants-me\/themes\/formata\/sass\/partials\/typography\/_typography\.scss}line{font-family:\0000375}}
   .content {
     font-size: 14px;
     font-size: 0.875rem;
