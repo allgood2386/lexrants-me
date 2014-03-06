@@ -36,6 +36,7 @@ PLATFORMS
 
 DEPENDENCIES
   breakpoint (>= 2.0.7)
+  sass (~> 3.2.0)
   sassy-buttons (= 0.1.4)
   singularitygs (= 1.1.2)
   toolkit (>= 1.0.0)
