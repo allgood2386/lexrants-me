@@ -8,8 +8,6 @@
 namespace Drupal\aggregator\Plugin\Block;
 
 use Drupal\block\BlockBase;
-use Drupal\block\Annotation\Block;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -110,11 +108,12 @@ class AggregatorFeedBlock extends BlockBase implements ContainerFactoryPluginInt
       '#default_value' => $this->configuration['feed'],
       '#options' => $options,
     );
+    $range = range(2, 20);
     $form['block_count'] = array(
       '#type' => 'select',
       '#title' => t('Number of news items in block'),
       '#default_value' => $this->configuration['block_count'],
-      '#options' => drupal_map_assoc(range(2, 20)),
+      '#options' => array_combine($range, $range),
     );
     return $form;
   }

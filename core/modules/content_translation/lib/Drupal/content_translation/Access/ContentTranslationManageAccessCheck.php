@@ -7,9 +7,9 @@
 
 namespace Drupal\content_translation\Access;
 
-use Drupal\Core\Access\StaticAccessCheckInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Language\Language;
+use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Access check for entity translation CRUD operation.
  */
-class ContentTranslationManageAccessCheck implements StaticAccessCheckInterface {
+class ContentTranslationManageAccessCheck implements AccessInterface {
 
   /**
    * The entity type manager.
@@ -39,20 +39,13 @@ class ContentTranslationManageAccessCheck implements StaticAccessCheckInterface 
   /**
    * {@inheritdoc}
    */
-  public function appliesTo() {
-    return array('_access_content_translation_manage');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function access(Route $route, Request $request, AccountInterface $account) {
-    $entity_type = $request->attributes->get('_entity_type');
+    $entity_type = $request->attributes->get('_entity_type_id');
+    /** @var $entity \Drupal\Core\Entity\EntityInterface */
     if ($entity = $request->attributes->get($entity_type)) {
       $route_requirements = $route->getRequirements();
       $operation = $route_requirements['_access_content_translation_manage'];
-      $controller_class = $this->entityManager->getControllerClass($entity_type, 'translation');
-      $controller = new $controller_class($entity_type, $entity->entityInfo());
+      $controller = content_translation_controller($entity_type);
 
       // Load translation.
       $translations = $entity->getTranslationLanguages();
@@ -63,7 +56,7 @@ class ContentTranslationManageAccessCheck implements StaticAccessCheckInterface 
           $source = language_load($request->attributes->get('source'));
           $target = language_load($request->attributes->get('target'));
           $source = !empty($source) ? $source : $entity->language();
-          $target = !empty($target) ? $target : language(Language::TYPE_CONTENT);
+          $target = !empty($target) ? $target : \Drupal::languageManager()->getCurrentLanguage(Language::TYPE_CONTENT);
           return ($source->id != $target->id
             && isset($languages[$source->id])
             && isset($languages[$target->id])
@@ -74,7 +67,7 @@ class ContentTranslationManageAccessCheck implements StaticAccessCheckInterface 
         case 'update':
         case 'delete':
           $language = language_load($request->attributes->get('language'));
-          $language = !empty($language) ? $language : language(Language::TYPE_CONTENT);
+          $language = !empty($language) ? $language : \Drupal::languageManager()->getCurrentLanguage(Language::TYPE_CONTENT);
           return isset($languages[$language->id])
             && $language->id != $entity->getUntranslated()->language()->id
             && isset($translations[$language->id])

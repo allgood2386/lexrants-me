@@ -11,23 +11,16 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\breakpoint\BreakpointGroupInterface;
 use Drupal\breakpoint\InvalidBreakpointSourceException;
 use Drupal\breakpoint\InvalidBreakpointSourceTypeException;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Defines the BreakpointGroup entity.
  *
- * @EntityType(
+ * @ConfigEntityType(
  *   id = "breakpoint_group",
  *   label = @Translation("Breakpoint group"),
- *   controllers = {
- *     "storage" = "Drupal\Core\Config\Entity\ConfigStorageController"
- *   },
- *   config_prefix = "breakpoint.breakpoint_group",
  *   entity_keys = {
  *     "id" = "id",
- *     "label" = "label",
- *     "uuid" = "uuid"
+ *     "label" = "label"
  *   }
  * )
  */

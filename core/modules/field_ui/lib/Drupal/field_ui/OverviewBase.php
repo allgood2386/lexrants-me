@@ -9,6 +9,7 @@ namespace Drupal\field_ui;
 
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Render\Element;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -31,18 +32,18 @@ abstract class OverviewBase extends FormBase {
   protected $bundle = '';
 
   /**
+   * The entity type of the entity bundle.
+   *
+   * @var string
+   */
+  protected $bundleEntityType;
+
+  /**
    * The entity view or form mode.
    *
    * @var string
    */
   protected $mode = '';
-
-  /**
-   * The admin path of the overview page.
-   *
-   * @var string
-   */
-  protected $adminPath = NULL;
 
   /**
    * The entity manager.
@@ -73,18 +74,18 @@ abstract class OverviewBase extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, $entity_type = NULL, $bundle = NULL) {
+  public function buildForm(array $form, array &$form_state, $entity_type_id = NULL, $bundle = NULL) {
+    $entity_type = $this->entityManager->getDefinition($entity_type_id);
+    $this->bundleEntityType = $entity_type->getBundleEntityType();
     if (!isset($form_state['bundle'])) {
       if (!$bundle) {
-        $entity_info = $this->entityManager->getDefinition($entity_type);
-        $bundle = $this->getRequest()->attributes->get('_raw_variables')->get($entity_info['bundle_entity_type']);
+        $bundle = $this->getRequest()->attributes->get('_raw_variables')->get($this->bundleEntityType);
       }
       $form_state['bundle'] = $bundle;
     }
 
-    $this->entity_type = $entity_type;
+    $this->entity_type = $entity_type_id;
     $this->bundle = $form_state['bundle'];
-    $this->adminPath = $this->entityManager->getAdminPath($this->entity_type, $this->bundle);
 
     // When displaying the form, make sure the list of fields is up-to-date.
     if (empty($form_state['post'])) {
@@ -136,7 +137,15 @@ abstract class OverviewBase extends FormBase {
    * This function is assigned as a #pre_render callback in
    * field_ui_element_info().
    *
-   * @see drupal_render().
+   * @param array $element
+   *   A structured array containing two sub-levels of elements. Properties
+   *   used:
+   *   - #tabledrag: The value is a list of $options arrays that are passed to
+   *     drupal_attach_tabledrag(). The HTML ID of the table is added to each
+   *     $options array.
+   *
+   * @see drupal_render()
+   * @see drupal_pre_render_table()
    */
   public function tablePreRender($elements) {
     $js_settings = array();
@@ -149,7 +158,8 @@ abstract class OverviewBase extends FormBase {
     $trees = array_fill_keys(array_keys($regions), $tree);
 
     $parents = array();
-    $list = drupal_map_assoc(element_children($elements));
+    $children = Element::children($elements);
+    $list = array_combine($children, $children);
 
     // Iterate on rows until we can build a known tree path for all of them.
     while ($list) {
@@ -207,6 +217,16 @@ abstract class OverviewBase extends FormBase {
       'data' => array('fieldUIRowsData' => $js_settings),
     );
 
+    // If the custom #tabledrag is set and there is a HTML ID, add the table's
+    // HTML ID to the options and attach the behavior.
+    // @see drupal_pre_render_table()
+    if (!empty($elements['#tabledrag']) && isset($elements['#attributes']['id'])) {
+      foreach ($elements['#tabledrag'] as $options) {
+        $options['table_id'] = $elements['#attributes']['id'];
+        drupal_attach_tabledrag($elements, $options);
+      }
+    }
+
     return $elements;
   }
 
@@ -222,7 +242,7 @@ abstract class OverviewBase extends FormBase {
       $array[] = $a['name'];
     }
     if (!empty($a['children'])) {
-      uasort($a['children'], 'drupal_sort_weight');
+      uasort($a['children'], array('Drupal\Component\Utility\SortArray', 'sortByWeightElement'));
       $array = array_merge($array, array_reduce($a['children'], array($this, 'reduceOrder')));
     }
     return $array;

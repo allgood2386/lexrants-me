@@ -7,8 +7,6 @@
 
 namespace Drupal\comment\Plugin\Action;
 
-use Drupal\Core\Annotation\Action;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Action\ConfigurableActionBase;
 use Drupal\comment\CommentInterface;
 
@@ -31,7 +29,7 @@ class UnpublishByKeywordComment extends ConfigurableActionBase {
     $text = drupal_render($build);
     foreach ($this->configuration['keywords'] as $keyword) {
       if (strpos($text, $keyword) !== FALSE) {
-        $comment->status->value = CommentInterface::NOT_PUBLISHED;
+        $comment->setPublished(FALSE);
         $comment->save();
         break;
       }

@@ -7,66 +7,22 @@
 
 namespace Drupal\Core\Field;
 
-use Drupal\Core\Field\Plugin\DataType\FieldInstanceInterface;
-use Drupal\Core\TypedData\TypedDataInterface;
-use Drupal\field\Field;
-
 /**
  * Represents a configurable entity field item list.
  */
 class ConfigFieldItemList extends FieldItemList implements ConfigFieldItemListInterface {
 
   /**
-   * The Field instance definition.
-   *
-   * @var \Drupal\field\Entity\FieldInstance
-   */
-  protected $instance;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct($definition, $name = NULL, TypedDataInterface $parent = NULL) {
-    parent::__construct($definition, $name, $parent);
-    // Definition can be the field config or field instance.
-    if ($definition instanceof FieldInstanceInterface) {
-      $this->instance = $definition;
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getFieldDefinition() {
-    // Configurable fields have the field_config entity injected as definition,
-    // but we want to return the more specific field instance here.
-    // @todo: Overhaul this once we have per-bundle field definitions injected,
-    // see https://drupal.org/node/2114707.
-    if (!isset($this->instance)) {
-      $entity = $this->getEntity();
-      $instances = Field::fieldInfo()->getBundleInstances($entity->entityType(), $entity->bundle());
-      if (isset($instances[$this->getName()])) {
-        $this->instance = $instances[$this->getName()];
-      }
-      else {
-        // For base fields, fall back to return the general definition.
-        return parent::getFieldDefinition();
-      }
-    }
-    return $this->instance;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function getConstraints() {
-    $constraints = array();
+    $constraints = parent::getConstraints();
     // Check that the number of values doesn't exceed the field cardinality. For
     // form submitted values, this can only happen with 'multiple value'
     // widgets.
     $cardinality = $this->getFieldDefinition()->getCardinality();
     if ($cardinality != FieldDefinitionInterface::CARDINALITY_UNLIMITED) {
-      $constraints[] = \Drupal::typedData()
+      $constraints[] = \Drupal::typedDataManager()
         ->getValidationConstraintManager()
         ->create('Count', array(
           'max' => $cardinality,
@@ -141,7 +97,7 @@ class ConfigFieldItemList extends FieldItemList implements ConfigFieldItemListIn
 
       // Use the widget currently configured for the 'default' form mode, or
       // fallback to the default widget for the field type.
-      $entity_form_display = entity_get_form_display($entity->entityType(), $entity->bundle(), 'default');
+      $entity_form_display = entity_get_form_display($entity->getEntityTypeId(), $entity->bundle(), 'default');
       $widget = $entity_form_display->getRenderer($this->getFieldDefinition()->getName());
       if (!$widget) {
         $widget = \Drupal::service('plugin.manager.field.widget')->getInstance(array('field_definition' => $this->getFieldDefinition()));

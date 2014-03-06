@@ -8,8 +8,6 @@
 namespace Drupal\user\Plugin\views\wizard;
 
 use Drupal\views\Plugin\views\wizard\WizardPluginBase;
-use Drupal\views\Annotation\ViewsWizard;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * @todo: replace numbers with constants.
@@ -66,6 +64,7 @@ class Users extends WizardPluginBase {
 
     // Add permission-based access control.
     $display_options['access']['type'] = 'perm';
+    $display_options['access']['provider'] = 'user';
     $display_options['access']['perm'] = 'access user profiles';
 
     // Remove the default fields, since we are customizing them here.

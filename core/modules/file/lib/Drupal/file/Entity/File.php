@@ -8,9 +8,8 @@
 namespace Drupal\file\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\Annotation\EntityType;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
-use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\Language\Language;
 use Drupal\file\FileInterface;
@@ -19,7 +18,7 @@ use Drupal\user\UserInterface;
 /**
  * Defines the file entity class.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "file",
  *   label = @Translation("File"),
  *   controllers = {
@@ -113,8 +112,15 @@ class File extends ContentEntityBase implements FileInterface {
   /**
    * {@inheritdoc}
    */
+  public function getCreatedTime() {
+    return $this->get('created')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getChangedTime() {
-    return $this->get('timestamp')->value;
+    return $this->get('changed')->value;
   }
 
   /**
@@ -127,8 +133,24 @@ class File extends ContentEntityBase implements FileInterface {
   /**
    * {@inheritdoc}
    */
-  public function setOwner(UserInterface $user) {
-    return $this->get('uid')->entity = $user;
+  public function getOwnerId() {
+    return $this->get('uid')->target_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwnerId($uid) {
+    $this->set('uid', $uid);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOwner(UserInterface $account) {
+    $this->set('uid', $account->id());
+    return $this;
   }
 
   /**
@@ -180,7 +202,11 @@ class File extends ContentEntityBase implements FileInterface {
   public function preSave(EntityStorageControllerInterface $storage_controller) {
     parent::preSave($storage_controller);
 
-    $this->timestamp = REQUEST_TIME;
+    $this->changed->value = REQUEST_TIME;
+    if (empty($this->created->value)) {
+      $this->created->value = REQUEST_TIME;
+    }
+
     $this->setSize(filesize($this->getFileUri()));
     if (!isset($this->langcode->value)) {
       // Default the file's language code to none, because files are language
@@ -215,7 +241,7 @@ class File extends ContentEntityBase implements FileInterface {
   /**
    * {@inheritdoc}
    */
-  public static function baseFieldDefinitions($entity_type) {
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields['fid'] = FieldDefinition::create('integer')
       ->setLabel(t('File ID'))
       ->setDescription(t('The file ID.'))
@@ -255,9 +281,13 @@ class File extends ContentEntityBase implements FileInterface {
       ->setLabel(t('Status'))
       ->setDescription(t('The status of the file, temporary (0) and permanent (1).'));
 
-    $fields['timestamp'] = FieldDefinition::create('integer')
+    $fields['created'] = FieldDefinition::create('integer')
       ->setLabel(t('Created'))
-      ->setDescription(t('The time that the node was created.'));
+      ->setDescription(t('The timestamp that the file was created.'));
+
+    $fields['changed'] = FieldDefinition::create('integer')
+      ->setLabel(t('Changed'))
+      ->setDescription(t('The timestamp that the file was last changed.'));
 
     return $fields;
   }

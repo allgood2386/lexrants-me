@@ -70,12 +70,19 @@ function theme_field_multiple_value_form($variables) {
     }
 
     $table = array(
-      '#theme' => 'table',
+      '#type' => 'table',
       '#header' => $header,
       '#rows' => $rows,
       '#attributes' => array(
         'id' => $table_id,
         'class' => array('field-multiple-table'),
+      ),
+      '#tabledrag' => array(
+        array(
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => $order_class,
+        ),
       ),
     );
     $output = '<div class="form-item">';
@@ -83,8 +90,6 @@ function theme_field_multiple_value_form($variables) {
     $output .= $element['#description'] ? '<div class="description">' . $element['#description'] . '</div>' : '';
     $output .= '<div class="clearfix">' . drupal_render($add_more_button) . '</div>';
     $output .= '</div>';
-
-    drupal_add_tabledrag($table_id, 'order', 'sibling', $order_class);
   }
   else {
     foreach (element_children($element) as $key) {
@@ -130,58 +135,6 @@ function field_form_element_after_build($element, &$form_state) {
   $field_state = field_form_get_state($parents, $field_name, $form_state);
   $field_state['array_parents'] = $element['#array_parents'];
   field_form_set_state($parents, $field_name, $form_state, $field_state);
-
-  return $element;
-}
-
-/**
- * Form submission handler for the "Add another item" button of a field form.
- *
- * This handler is run regardless of whether JS is enabled or not. It makes
- * changes to the form state. If the button was clicked with JS disabled, then
- * the page is reloaded with the complete rebuilt form. If the button was
- * clicked with JS enabled, then Drupal\system\FormAjaxController::content()
- * calls field_add_more_js() to return just the changed part of the form.
- */
-function field_add_more_submit($form, &$form_state) {
-  $button = $form_state['triggering_element'];
-
-  // Go one level up in the form, to the widgets container.
-  $element = NestedArray::getValue($form, array_slice($button['#array_parents'], 0, -1));
-  $field_name = $element['#field_name'];
-  $parents = $element['#field_parents'];
-
-  // Increment the items count.
-  $field_state = field_form_get_state($parents, $field_name, $form_state);
-  $field_state['items_count']++;
-  field_form_set_state($parents, $field_name, $form_state, $field_state);
-
-  $form_state['rebuild'] = TRUE;
-}
-
-/**
- * Ajax callback: Responds to a new empty widget being added to the form.
- *
- * This returns the new page content to replace the page content made obsolete
- * by the form submission.
- *
- * @see field_add_more_submit()
- */
-function field_add_more_js($form, $form_state) {
-  $button = $form_state['triggering_element'];
-
-  // Go one level up in the form, to the widgets container.
-  $element = NestedArray::getValue($form, array_slice($button['#array_parents'], 0, -1));
-
-  // Ensure the widget allows adding additional items.
-  if ($element['#cardinality'] != FieldDefinitionInterface::CARDINALITY_UNLIMITED) {
-    return;
-  }
-
-  // Add a DIV around the delta receiving the Ajax effect.
-  $delta = $element['#max_delta'];
-  $element[$delta]['#prefix'] = '<div class="ajax-new-content">' . (isset($element[$delta]['#prefix']) ? $element[$delta]['#prefix'] : '');
-  $element[$delta]['#suffix'] = (isset($element[$delta]['#suffix']) ? $element[$delta]['#suffix'] : '') . '</div>';
 
   return $element;
 }

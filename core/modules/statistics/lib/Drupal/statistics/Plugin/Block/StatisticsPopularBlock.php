@@ -8,8 +8,6 @@
 namespace Drupal\statistics\Plugin\Block;
 
 use Drupal\block\BlockBase;
-use Drupal\block\Annotation\Block;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Session\AccountInterface;
 
 /**
@@ -81,7 +79,8 @@ class StatisticsPopularBlock extends BlockBase {
    */
   public function blockForm($form, &$form_state) {
     // Popular content block settings.
-    $numbers = array('0' => t('Disabled')) + drupal_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40));
+    $numbers = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 40);
+    $numbers = array('0' => t('Disabled')) + array_combine($numbers, $numbers);
     $form['statistics_block_top_day_num'] = array(
      '#type' => 'select',
      '#title' => t("Number of day's top views to display"),

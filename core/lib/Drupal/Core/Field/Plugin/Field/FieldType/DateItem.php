@@ -7,7 +7,9 @@
 
 namespace Drupal\Core\Field\Plugin\Field\FieldType;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
+use Drupal\Core\TypedData\DataDefinition;
 
 /**
  * Defines the 'date' entity field type.
@@ -22,25 +24,28 @@ use Drupal\Core\Field\FieldItemBase;
 class DateItem extends FieldItemBase {
 
   /**
-   * Definitions of the contained properties.
-   *
-   * @see DateItem::getPropertyDefinitions()
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  static $propertyDefinitions;
+  public static function propertyDefinitions(FieldDefinitionInterface $field_definition) {
+    $properties['value'] = DataDefinition::create('date')
+      ->setLabel(t('Date value'));
+
+    return $properties;
+  }
 
   /**
-   * Implements \Drupal\Core\TypedData\ComplexDataInterface::getPropertyDefinitions().
+   * {@inheritdoc}
    */
-  public function getPropertyDefinitions() {
-
-    if (!isset(static::$propertyDefinitions)) {
-      static::$propertyDefinitions['value'] = array(
-        'type' => 'date',
-        'label' => t('Date value'),
-      );
-    }
-    return static::$propertyDefinitions;
+  public static function schema(FieldDefinitionInterface $field_definition) {
+    return array(
+      'columns' => array(
+        'value' => array(
+          'type' => 'varchar',
+          'length' => 20,
+          'not null' => FALSE,
+        ),
+      ),
+    );
   }
+
 }

@@ -39,8 +39,8 @@ class MigratePluginManager extends DefaultPluginManager {
    *   The annotation class name.
    */
   public function __construct($type, \Traversable $namespaces, CacheBackendInterface $cache_backend, LanguageManager $language_manager, ModuleHandlerInterface $module_handler, $annotation = 'Drupal\Component\Annotation\PluginID') {
-    parent::__construct("Plugin/migrate/$type", $namespaces, $annotation);
-    $this->alterInfo($module_handler, 'migrate_' . $type . '_info');
+    parent::__construct("Plugin/migrate/$type", $namespaces, $module_handler, $annotation);
+    $this->alterInfo('migrate_' . $type . '_info');
     $this->setCacheBackend($cache_backend, $language_manager, 'migrate_plugins_' . $type);
   }
 
@@ -50,7 +50,7 @@ class MigratePluginManager extends DefaultPluginManager {
    * A specific createInstance method is necessary to pass the migration on.
    */
   public function createInstance($plugin_id, array $configuration = array(), MigrationInterface $migration = NULL) {
-    $plugin_definition = $this->discovery->getDefinition($plugin_id);
+    $plugin_definition = $this->getDefinition($plugin_id);
     $plugin_class = DefaultFactory::getPluginClass($plugin_id, $plugin_definition);
     // If the plugin provides a factory method, pass the container to it.
     if (is_subclass_of($plugin_class, 'Drupal\Core\Plugin\ContainerFactoryPluginInterface')) {

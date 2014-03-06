@@ -10,10 +10,12 @@ namespace Drupal\block;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Component\Utility\Json;
 use Drupal\Component\Utility\String;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityListController;
 use Drupal\Core\Entity\EntityControllerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -55,19 +57,15 @@ class BlockListController extends ConfigEntityListController implements FormInte
   /**
    * Constructs a new BlockListController object.
    *
-   * @param string $entity_type
-   *   The type of entity to be listed.
-   * @param array $entity_info
-   *   An array of entity info for the entity type.
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type definition.
    * @param \Drupal\Core\Entity\EntityStorageControllerInterface $storage
    *   The entity storage controller class.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler to invoke hooks on.
    * @param \Drupal\Component\Plugin\PluginManagerInterface $block_manager
    *   The block manager.
    */
-  public function __construct($entity_type, array $entity_info, EntityStorageControllerInterface $storage, ModuleHandlerInterface $module_handler, PluginManagerInterface $block_manager) {
-    parent::__construct($entity_type, $entity_info, $storage, $module_handler);
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageControllerInterface $storage, PluginManagerInterface $block_manager) {
+    parent::__construct($entity_type, $storage);
 
     $this->blockManager = $block_manager;
   }
@@ -75,12 +73,10 @@ class BlockListController extends ConfigEntityListController implements FormInte
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(ContainerInterface $container, $entity_type, array $entity_info) {
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
     return new static(
       $entity_type,
-      $entity_info,
-      $container->get('entity.manager')->getStorageController($entity_type),
-      $container->get('module_handler'),
+      $container->get('entity.manager')->getStorageController($entity_type->id()),
       $container->get('plugin.manager.block')
     );
   }
@@ -102,7 +98,7 @@ class BlockListController extends ConfigEntityListController implements FormInte
     $entities = _block_rehash($this->theme);
 
     // Sort the blocks using \Drupal\block\Entity\Block::sort().
-    uasort($entities, array($this->entityInfo['class'], 'sort'));
+    uasort($entities, array($this->entityType->getClass(), 'sort'));
     return $entities;
   }
 
@@ -149,7 +145,7 @@ class BlockListController extends ConfigEntityListController implements FormInte
     }
     $entities = $this->load();
     $form['#theme'] = array('block_list');
-    $form['#attached']['library'][] = array('system', 'drupal.tableheader');
+    $form['#attached']['library'][] = array('core', 'drupal.tableheader');
     $form['#attached']['library'][] = array('block', 'drupal.block');
     $form['#attached']['library'][] = array('block', 'drupal.block.admin');
     $form['#attributes']['class'][] = 'clearfix';
@@ -200,23 +196,22 @@ class BlockListController extends ConfigEntityListController implements FormInte
     // Loop over each region and build blocks.
     foreach ($block_regions_with_disabled as $region => $title) {
       $form['blocks']['#tabledrag'][] = array(
-        'match',
-        'sibling',
-        'block-region-select',
-        'block-region-' . $region,
-        NULL,
-        FALSE,
+        'action' => 'match',
+        'relationship' => 'sibling',
+        'group' => 'block-region-select',
+        'subgroup' => 'block-region-' . $region,
+        'hidden' => FALSE,
       );
       $form['blocks']['#tabledrag'][] = array(
-        'order',
-        'sibling',
-        'block-weight',
-        'block-weight-' . $region,
+        'action' => 'order',
+        'relationship' => 'sibling',
+        'group' => 'block-weight',
+        'subgroup' => 'block-weight-' . $region,
       );
 
       $form['blocks'][$region] = array(
         '#attributes' => array(
-          'class' => array('region-title', 'region-title-' . $region, 'odd'),
+          'class' => array('region-title', 'region-title-' . $region),
           'no_striping' => TRUE,
         ),
       );
@@ -353,6 +348,7 @@ class BlockListController extends ConfigEntityListController implements FormInte
         $form['place_blocks']['list'][$category_key] = array(
           '#type' => 'details',
           '#title' => $category,
+          '#open' => TRUE,
           'content' => array(
             '#theme' => 'links',
             '#links' => array(),
@@ -418,7 +414,7 @@ class BlockListController extends ConfigEntityListController implements FormInte
       $entity->save();
     }
     drupal_set_message(t('The block settings have been updated.'));
-    cache_invalidate_tags(array('content' => TRUE));
+    Cache::invalidateTags(array('content' => TRUE));
   }
 
 }

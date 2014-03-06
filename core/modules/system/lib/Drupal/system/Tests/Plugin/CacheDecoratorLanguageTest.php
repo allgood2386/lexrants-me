@@ -69,6 +69,7 @@ class CacheDecoratorLanguageTest extends WebTestBase {
         $custom_strings[$definition['label']] = $langcode . ' ' . $definition['label'];
       }
       $this->addCustomTranslations($langcode, array('' => $custom_strings));
+      $this->rebuildContainer();
     }
     // Write test settings.php with new translations.
     $this->writeCustomTranslations();
@@ -97,7 +98,7 @@ class CacheDecoratorLanguageTest extends WebTestBase {
     // Manually check that the expected cache keys are present.
     $languages[] = 'en';
     foreach ($languages as $langcode) {
-      $cache = cache()->get('mock_block:' . $langcode);
+      $cache = \Drupal::cache()->get('mock_block:' . $langcode);
       $this->assertEqual($cache->cid, 'mock_block:' . $langcode, format_string('The !cache cache exists.', array('!cache' => 'mock_block:' . $langcode)));
       $this->assertEqual($cache->expire, 1542646800, format_string('The cache expiration was properly set.'));
     }
@@ -105,7 +106,7 @@ class CacheDecoratorLanguageTest extends WebTestBase {
     $manager = new CachedMockBlockManager();
     $manager->clearCachedDefinitions();
     foreach ($languages as $langcode) {
-      $cache = cache()->get('mock_block:' . $langcode);
+      $cache = \Drupal::cache()->get('mock_block:' . $langcode);
       $this->assertFalse($cache, format_string('The !cache cache was properly cleared through the cache::deleteTags() method.', array('!cache' => 'mock_block:' . $langcode)));
     }
     // Change the translations for the german language and recheck strings.

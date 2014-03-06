@@ -7,6 +7,8 @@
 
 namespace Drupal\views\Plugin\views\exposed_form;
 
+use Drupal\Component\Utility\String;
+use Drupal\views\Form\ViewsExposedForm;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\PluginBase;
@@ -138,7 +140,7 @@ abstract class ExposedFormPluginBase extends PluginBase {
     }
 
     $form_state['exposed_form_plugin'] = $this;
-    $form = drupal_build_form('views_exposed_form', $form_state);
+    $form = \Drupal::formBuilder()->buildForm('\Drupal\views\Form\ViewsExposedForm', $form_state);
 
     if (!$this->view->display_handler->displaysExposed() || (!$block && $this->view->display_handler->getOption('exposed_block'))) {
       return array();
@@ -198,7 +200,7 @@ abstract class ExposedFormPluginBase extends PluginBase {
     $exposed_sorts = array();
     foreach ($this->view->sort as $id => $handler) {
       if ($handler->canExpose() && $handler->isExposed()) {
-        $exposed_sorts[$id] = check_plain($handler->options['expose']['label']);
+        $exposed_sorts[$id] = String::checkPlain($handler->options['expose']['label']);
       }
     }
 

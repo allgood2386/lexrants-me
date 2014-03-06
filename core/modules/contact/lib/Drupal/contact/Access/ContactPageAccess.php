@@ -7,8 +7,8 @@
 
 namespace Drupal\contact\Access;
 
-use Drupal\Core\Access\StaticAccessCheckInterface;
-use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\UserDataInterface;
 use Symfony\Component\Routing\Route;
@@ -17,12 +17,12 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Access check for contact_personal_page route.
  */
-class ContactPageAccess implements StaticAccessCheckInterface {
+class ContactPageAccess implements AccessInterface {
 
   /**
    * The contact settings config object.
    *
-   * @var \Drupal\Core\Config\ConfigFactory
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
   protected $configFactory;
 
@@ -36,21 +36,14 @@ class ContactPageAccess implements StaticAccessCheckInterface {
   /**
    * Constructs a ContactPageAccess instance.
    *
-   * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
    * @param \Drupal\user\UserDataInterface $user_data
    *   The user data service.
    */
-  public function __construct(ConfigFactory $config_factory, UserDataInterface $user_data) {
+  public function __construct(ConfigFactoryInterface $config_factory, UserDataInterface $user_data) {
     $this->configFactory = $config_factory;
     $this->userData = $user_data;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function appliesTo() {
-    return array('_access_contact_personal_tab');
   }
 
   /**

@@ -9,7 +9,6 @@ namespace Drupal\aggregator\Controller;
 
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\aggregator\FeedInterface;
 use Drupal\aggregator\ItemInterface;
 use Drupal\Core\Database\Connection;
@@ -21,7 +20,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 /**
  * Returns responses for aggregator module routes.
  */
-class AggregatorController extends ControllerBase implements ContainerInjectionInterface {
+class AggregatorController extends ControllerBase {
 
   /**
    * The database connection.
@@ -41,7 +40,7 @@ class AggregatorController extends ControllerBase implements ContainerInjectionI
   }
 
   /**
-   * {inheritdoc}
+   * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
     return new static(
@@ -56,12 +55,11 @@ class AggregatorController extends ControllerBase implements ContainerInjectionI
    *   A form array as expected by drupal_render().
    */
   public function feedAdd() {
-    $entity_manager = $this->entityManager();
-    $feed = $entity_manager->getStorageController('aggregator_feed')
+    $feed = $this->entityManager()->getStorageController('aggregator_feed')
       ->create(array(
         'refresh' => 3600,
       ));
-    return $entity_manager->getForm($feed);
+    return $this->entityFormBuilder()->getForm($feed);
   }
 
   /**
@@ -228,7 +226,7 @@ class AggregatorController extends ControllerBase implements ContainerInjectionI
             ->viewMultiple($items, 'summary');
         }
       }
-      $feed->url = $this->urlGenerator()->generateFromRoute('aggregator.feed_view', array('aggregator_feed' => $feed->id()));
+      $feed->url = $this->url('aggregator.feed_view', array('aggregator_feed' => $feed->id()));
       $build[$feed->id()] = array(
         '#theme' => 'aggregator_summary_items',
         '#summary_items' => $summary_items,

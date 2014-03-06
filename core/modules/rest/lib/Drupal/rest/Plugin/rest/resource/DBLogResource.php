@@ -7,8 +7,6 @@
 
 namespace Drupal\rest\Plugin\rest\resource;
 
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
 
@@ -17,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Provides a resource for database watchdog log entries.
  *
- * @Plugin(
+ * @RestResource(
  *   id = "dblog",
  *   label = @Translation("Watchdog database log")
  * )
@@ -29,7 +27,7 @@ class DBLogResource extends ResourceBase {
    */
   public function routes() {
     // Only expose routes if the dblog module is enabled.
-    if (module_exists('dblog')) {
+    if (\Drupal::moduleHandler()->moduleExists('dblog')) {
       return parent::routes();
     }
     return new RouteCollection();

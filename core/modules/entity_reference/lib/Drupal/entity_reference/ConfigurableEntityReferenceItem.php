@@ -7,10 +7,14 @@
 
 namespace Drupal\entity_reference;
 
-use Drupal\Core\TypedData\DataDefinition;
-use Drupal\field\FieldInterface;
-use Drupal\Core\Field\ConfigEntityReferenceItemBase;
+use Drupal\Component\Utility\String;
 use Drupal\Core\Field\ConfigFieldItemInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\TypedData\AllowedValuesInterface;
+use Drupal\Core\TypedData\DataDefinition;
+use Drupal\Core\Validation\Plugin\Validation\Constraint\AllowedValuesConstraint;
 
 /**
  * Alternative plugin implementation of the 'entity_reference' field type.
@@ -22,86 +26,111 @@ use Drupal\Core\Field\ConfigFieldItemInterface;
  *  - target_type: The entity type to reference.
  *
  * @see entity_reference_field_info_alter().
- *
  */
-class ConfigurableEntityReferenceItem extends ConfigEntityReferenceItemBase implements ConfigFieldItemInterface {
-
-  /**
-   * Definitions of the contained properties.
-   *
-   * @see ConfigurableEntityReferenceItem::getPropertyDefinitions()
-   *
-   * @var array
-   */
-  static $propertyDefinitions;
+class ConfigurableEntityReferenceItem extends EntityReferenceItem implements ConfigFieldItemInterface, AllowedValuesInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function getPropertyDefinitions() {
-    $settings = $this->definition->getSettings();
-    $target_type = $settings['target_type'];
-
-    // Definitions vary by entity type and bundle, so key them accordingly.
-    $key = $target_type . ':';
-    $key .= isset($settings['target_bundle']) ? $settings['target_bundle'] : '';
-
-    if (!isset(static::$propertyDefinitions[$key])) {
-      // Call the parent to define the target_id and entity properties.
-      parent::getPropertyDefinitions();
-
-      // Only add the revision ID property if the target entity type supports
-      // revisions.
-      $target_type_info = \Drupal::entityManager()->getDefinition($target_type);
-      if (!empty($target_type_info['entity_keys']['revision']) && !empty($target_type_info['revision_table'])) {
-        static::$propertyDefinitions[$key]['revision_id'] = DataDefinition::create('integer')
-          ->setLabel(t('Revision ID'))
-          ->setConstraints(array('Range' => array('min' => 0)));
-      }
-    }
-
-    return static::$propertyDefinitions[$key];
+  public function getPossibleValues(AccountInterface $account = NULL) {
+    return $this->getSettableValues($account);
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function schema(FieldInterface $field) {
-    $target_type = $field->getSetting('target_type');
+  public function getPossibleOptions(AccountInterface $account = NULL) {
+    return $this->getSettableOptions($account);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSettableValues(AccountInterface $account = NULL) {
+    // Flatten options first, because "settable options" may contain group
+    // arrays.
+    $flatten_options = \Drupal::formBuilder()->flattenOptions($this->getSettableOptions($account));
+    return array_keys($flatten_options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSettableOptions(AccountInterface $account = NULL) {
+    $field_definition = $this->getFieldDefinition();
+    if (!$options = \Drupal::service('plugin.manager.entity_reference.selection')->getSelectionHandler($field_definition, $this->getEntity())->getReferenceableEntities()) {
+      return array();
+    }
+
+    // Rebuild the array by changing the bundle key into the bundle label.
+    $target_type = $field_definition->getSetting('target_type');
+    $bundles = \Drupal::entityManager()->getBundleInfo($target_type);
+
+    $return = array();
+    foreach ($options as $bundle => $entity_ids) {
+      $bundle_label = String::checkPlain($bundles[$bundle]['label']);
+      $return[$bundle_label] = $entity_ids;
+    }
+
+    return count($return) == 1 ? reset($return) : $return;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function propertyDefinitions(FieldDefinitionInterface $field_definition) {
+    $settings = $field_definition->getSettings();
+    $target_type = $settings['target_type'];
+
+    // Call the parent to define the target_id and entity properties.
+    $properties = parent::propertyDefinitions($field_definition);
+
+    // Only add the revision ID property if the target entity type supports
+    // revisions.
+    $target_type_info = \Drupal::entityManager()->getDefinition($target_type);
+    if ($target_type_info->hasKey('revision') && $target_type_info->getRevisionTable()) {
+      $properties['revision_id'] = DataDefinition::create('integer')
+        ->setLabel(t('Revision ID'))
+        ->setConstraints(array('Range' => array('min' => 0)));
+    }
+
+    return $properties;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConstraints() {
+    $constraints = parent::getConstraints();
+
+    // Remove the 'AllowedValuesConstraint' validation constraint because entity
+    // reference fields already use the 'ValidReference' constraint.
+    foreach ($constraints as $key => $constraint) {
+      if ($constraint instanceof AllowedValuesConstraint) {
+        unset($constraints[$key]);
+      }
+    }
+
+    return $constraints;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function schema(FieldDefinitionInterface $field_definition) {
+    $schema = parent::schema($field_definition);
+
+    $target_type = $field_definition->getSetting('target_type');
     $target_type_info = \Drupal::entityManager()->getDefinition($target_type);
 
-    if (is_subclass_of($target_type_info['class'], '\Drupal\Core\Entity\ContentEntityInterface')) {
-      $columns = array(
-        'target_id' => array(
-          'description' => 'The ID of the target entity.',
-          'type' => 'int',
-          'unsigned' => TRUE,
-          'not null' => TRUE,
-        ),
-        'revision_id' => array(
-          'description' => 'The revision ID of the target entity.',
-          'type' => 'int',
-          'unsigned' => TRUE,
-          'not null' => FALSE,
-        ),
+    if ($target_type_info->isSubclassOf('\Drupal\Core\Entity\ContentEntityInterface')) {
+      $schema['columns']['revision_id'] = array(
+        'description' => 'The revision ID of the target entity.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
       );
     }
-    else {
-      $columns = array(
-        'target_id' => array(
-          'description' => 'The ID of the target entity.',
-          'type' => 'varchar',
-          'length' => '255',
-        ),
-      );
-    }
-
-    $schema = array(
-      'columns' => $columns,
-      'indexes' => array(
-        'target_id' => array('target_id'),
-      ),
-    );
 
     return $schema;
   }
@@ -114,7 +143,7 @@ class ConfigurableEntityReferenceItem extends ConfigEntityReferenceItemBase impl
       '#type' => 'select',
       '#title' => t('Type of item to reference'),
       '#options' => \Drupal::entityManager()->getEntityTypeLabels(),
-      '#default_value' => $this->getFieldSetting('target_type'),
+      '#default_value' => $this->getSetting('target_type'),
       '#required' => TRUE,
       '#disabled' => $has_data,
       '#size' => 1,
@@ -130,7 +159,7 @@ class ConfigurableEntityReferenceItem extends ConfigEntityReferenceItemBase impl
     $instance = $form_state['instance'];
 
     // Get all selection plugins for this entity type.
-    $selection_plugins = \Drupal::service('plugin.manager.entity_reference.selection')->getSelectionGroups($this->getFieldSetting('target_type'));
+    $selection_plugins = \Drupal::service('plugin.manager.entity_reference.selection')->getSelectionGroups($this->getSetting('target_type'));
     $handler_groups = array_keys($selection_plugins);
 
     $handlers = \Drupal::service('plugin.manager.entity_reference.selection')->getDefinitions();
@@ -157,6 +186,7 @@ class ConfigurableEntityReferenceItem extends ConfigEntityReferenceItemBase impl
     $form['handler'] = array(
       '#type' => 'details',
       '#title' => t('Reference type'),
+      '#open' => TRUE,
       '#tree' => TRUE,
       '#process' => array('_entity_reference_form_process_merge_parent'),
     );

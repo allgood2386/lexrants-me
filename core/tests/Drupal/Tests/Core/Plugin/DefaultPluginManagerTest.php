@@ -68,6 +68,31 @@ class DefaultPluginManagerTest extends UnitTestCase {
   }
 
   /**
+   * Tests the plugin manager with a disabled module.
+   */
+  public function testDefaultPluginManagerWithDisabledModule() {
+     $definitions = $this->expectedDefinitions;
+     $definitions['cherry'] = array(
+      'id' => 'cherry',
+      'label' => 'Cherry',
+      'color' => 'red',
+      'class' => 'Drupal\plugin_test\Plugin\plugin_test\fruit\Cherry',
+      'provider' => 'disabled_module',
+    );
+
+    $module_handler = $this->getMock('Drupal\Core\Extension\ModuleHandlerInterface');
+
+    $module_handler->expects($this->once())
+      ->method('moduleExists')
+      ->with('disabled_module')
+      ->will($this->returnValue(FALSE));
+
+    $plugin_manager = new TestPluginManager($this->namespaces, $definitions, $module_handler, 'test_alter_hook');
+
+    $this->assertEmpty($plugin_manager->getDefinition('cherry'), 'Plugin information of a disabled module is not available');
+  }
+
+  /**
    * Tests the plugin manager with no cache and altering.
    */
   public function testDefaultPluginManager() {
@@ -113,9 +138,9 @@ class DefaultPluginManagerTest extends UnitTestCase {
       ->with($cid . ':en', $this->expectedDefinitions);
 
     $language = new Language(array('id' => 'en'));
-    $language_manager = $this->getMock('Drupal\Core\Language\LanguageManager');
+    $language_manager = $this->getMock('Drupal\Core\Language\LanguageManagerInterface');
     $language_manager->expects($this->once())
-      ->method('getLanguage')
+      ->method('getCurrentLanguage')
       ->with(Language::TYPE_INTERFACE)
       ->will($this->returnValue($language));
 
@@ -144,9 +169,9 @@ class DefaultPluginManagerTest extends UnitTestCase {
       ->method('set');
 
     $language = new Language(array('id' => 'en'));
-    $language_manager = $this->getMock('Drupal\Core\Language\LanguageManager');
+    $language_manager = $this->getMock('Drupal\Core\Language\LanguageManagerInterface');
     $language_manager->expects($this->once())
-      ->method('getLanguage')
+      ->method('getCurrentLanguage')
       ->with(Language::TYPE_INTERFACE)
       ->will($this->returnValue($language));
 
@@ -172,10 +197,12 @@ class DefaultPluginManagerTest extends UnitTestCase {
       ->expects($this->never())
       ->method('deleteMultiple');
 
+    $this->getContainerWithCacheBins($cache_backend);
+
     $language = new Language(array('id' => 'en'));
-    $language_manager = $this->getMock('Drupal\Core\Language\LanguageManager');
+    $language_manager = $this->getMock('Drupal\Core\Language\LanguageManagerInterface');
     $language_manager->expects($this->once())
-      ->method('getLanguage')
+      ->method('getCurrentLanguage')
       ->with(Language::TYPE_INTERFACE)
       ->will($this->returnValue($language));
 
@@ -185,4 +212,8 @@ class DefaultPluginManagerTest extends UnitTestCase {
     $plugin_manager->clearCachedDefinitions();
   }
 
+}
+
+if (!defined('DRUPAL_ROOT')) {
+  define('DRUPAL_ROOT', dirname(dirname(substr(__DIR__, 0, -strlen(__NAMESPACE__)))));
 }

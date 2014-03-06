@@ -11,7 +11,7 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\TypedData\TypedDataManager;
 use Drupal\field\FieldInfo;
-use Drupal\field\FieldInstanceInterface;
+use Drupal\field\FieldInstanceConfigInterface;
 use Drupal\field_ui\FieldUI;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -23,7 +23,7 @@ class FieldEditForm extends FormBase {
   /**
    * The field instance being edited.
    *
-   * @var \Drupal\field\FieldInstanceInterface
+   * @var \Drupal\field\FieldInstanceConfigInterface
    */
   protected $instance;
 
@@ -46,7 +46,7 @@ class FieldEditForm extends FormBase {
    *
    * @var \Drupal\Core\TypedData\TypedDataManager
    */
-  protected $typedData;
+  protected $typedDataManager;
 
   /**
    * {@inheritdoc}
@@ -62,13 +62,13 @@ class FieldEditForm extends FormBase {
    *   The entity manager.
    * @param \Drupal\field\FieldInfo $field_info
    *   The field info service.
-   * @param \Drupal\Core\TypedData\TypedDataManager $typed_data
+   * @param \Drupal\Core\TypedData\TypedDataManager $typed_data_manager
    *   The typed data manager.
    */
-  public function __construct(EntityManagerInterface $entity_manager, FieldInfo $field_info, TypedDataManager $typed_data) {
+  public function __construct(EntityManagerInterface $entity_manager, FieldInfo $field_info, TypedDataManager $typed_data_manager) {
     $this->entityManager = $entity_manager;
     $this->fieldInfo = $field_info;
-    $this->typedData = $typed_data;
+    $this->typedDataManager = $typed_data_manager;
   }
 
   /**
@@ -78,19 +78,20 @@ class FieldEditForm extends FormBase {
     return new static(
       $container->get('entity.manager'),
       $container->get('field.info'),
-      $container->get('typed_data')
+      $container->get('typed_data_manager')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, FieldInstanceInterface $field_instance = NULL) {
-    $this->instance = $form_state['instance'] = $field_instance;
+  public function buildForm(array $form, array &$form_state, FieldInstanceConfigInterface $field_instance_config = NULL) {
+    $this->instance = $form_state['instance'] = $field_instance_config;
     $form['#title'] = $this->instance->label();
 
     $field = $this->instance->getField();
     $form['#field'] = $field;
+    $form['#bundle'] = $this->instance->bundle;
 
     $description = '<p>' . $this->t('These settings apply to the %field field everywhere it is used. These settings impact the way that data is stored in the database and cannot be changed once data has been created.', array('%field' => $this->instance->label())) . '</p>';
 
@@ -124,13 +125,13 @@ class FieldEditForm extends FormBase {
       '#title_display' => 'invisible',
       '#options' => array(
         'number' => $this->t('Limited'),
-        FieldInstanceInterface::CARDINALITY_UNLIMITED => $this->t('Unlimited'),
+        FieldInstanceConfigInterface::CARDINALITY_UNLIMITED => $this->t('Unlimited'),
       ),
-      '#default_value' => ($cardinality == FieldInstanceInterface::CARDINALITY_UNLIMITED) ? FieldInstanceInterface::CARDINALITY_UNLIMITED : 'number',
+      '#default_value' => ($cardinality == FieldInstanceConfigInterface::CARDINALITY_UNLIMITED) ? FieldInstanceConfigInterface::CARDINALITY_UNLIMITED : 'number',
     );
     $form['field']['cardinality_container']['cardinality_number'] = array(
       '#type' => 'number',
-      '#default_value' => $cardinality != FieldInstanceInterface::CARDINALITY_UNLIMITED ? $cardinality : 1,
+      '#default_value' => $cardinality != FieldInstanceConfigInterface::CARDINALITY_UNLIMITED ? $cardinality : 1,
       '#min' => 1,
       '#title' => $this->t('Limit'),
       '#title_display' => 'invisible',
@@ -157,7 +158,7 @@ class FieldEditForm extends FormBase {
     // FieldItem.
     $ids = (object) array('entity_type' => $this->instance->entity_type, 'bundle' => $this->instance->bundle, 'entity_id' => NULL);
     $entity = _field_create_entity_from_ids($ids);
-    $form['field']['settings'] += $entity->get($field->getName())->offsetGet(0)->settingsForm($form, $form_state, $field->hasData());
+    $form['field']['settings'] += $entity->get($field->getName())->first()->settingsForm($form, $form_state, $field->hasData());
 
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array('#type' => 'submit', '#value' => $this->t('Save field settings'));
@@ -202,11 +203,18 @@ class FieldEditForm extends FormBase {
     try {
       $field->save();
       drupal_set_message($this->t('Updated field %label field settings.', array('%label' => $this->instance->label())));
-      if ($next_destination = FieldUI::getNextDestination($this->getRequest())) {
-        $form_state['redirect'] = $next_destination;
+      $request = $this->getRequest();
+      if (($destinations = $request->query->get('destinations')) && $next_destination = FieldUI::getNextDestination($destinations)) {
+        $request->query->remove('destinations');
+        if (isset($next_destination['route_name'])) {
+          $form_state['redirect_route'] = $next_destination;
+        }
+        else {
+          $form_state['redirect'] = $next_destination;
+        }
       }
       else {
-        $form_state['redirect_route'] = $this->entityManager->getAdminRouteInfo($this->instance->entity_type, $this->instance->bundle);
+        $form_state['redirect_route'] = FieldUI::getOverviewRouteInfo($this->instance->entity_type, $this->instance->bundle);
       }
     }
     catch (\Exception $e) {

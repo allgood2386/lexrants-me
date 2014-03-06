@@ -8,8 +8,6 @@
 namespace Drupal\taxonomy\Plugin\views\wizard;
 
 use Drupal\views\Plugin\views\wizard\WizardPluginBase;
-use Drupal\views\Annotation\ViewsWizard;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Tests creating taxonomy views with the wizard.
@@ -44,6 +42,7 @@ class TaxonomyTerm extends WizardPluginBase {
 
     // Add permission-based access control.
     $display_options['access']['type'] = 'perm';
+    $display_options['access']['provider'] = 'user';
 
     // Remove the default fields, since we are customizing them here.
     unset($display_options['fields']);

@@ -8,10 +8,8 @@
 namespace Drupal\aggregator_test\Plugin\aggregator\parser;
 
 use Drupal\aggregator\Plugin\ParserInterface;
-use Drupal\aggregator\Entity\Feed;
+use Drupal\aggregator\FeedInterface;
 use Drupal\aggregator\Plugin\aggregator\parser\DefaultParser;
-use Drupal\aggregator\Annotation\AggregatorParser;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Defines a Test parser implementation.
@@ -31,7 +29,7 @@ class TestParser extends DefaultParser implements ParserInterface {
    *
    * @todo Actually test this.
    */
-  public function parse(Feed $feed) {
+  public function parse(FeedInterface $feed) {
     return parent::parse($feed);
   }
 }

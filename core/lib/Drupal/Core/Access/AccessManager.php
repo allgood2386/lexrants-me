@@ -7,7 +7,9 @@
 
 namespace Drupal\Core\Access;
 
-use Drupal\Core\ParamConverter\ParamConverterManager;
+use Drupal\Core\ParamConverter\ParamConverterManagerInterface;
+use Drupal\Core\ParamConverter\ParamNotConvertedException;
+use Drupal\Core\Routing\Access\AccessInterface as RoutingAccessInterface;
 use Drupal\Core\Routing\RequestHelper;
 use Drupal\Core\Routing\RouteProviderInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -16,8 +18,6 @@ use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 
@@ -73,7 +73,7 @@ class AccessManager extends ContainerAware {
   /**
    * The paramconverter manager.
    *
-   * @var \Drupal\Core\ParamConverter\ParamConverterManager
+   * @var \Drupal\Core\ParamConverter\ParamConverterManagerInterface
    */
   protected $paramConverterManager;
 
@@ -91,10 +91,10 @@ class AccessManager extends ContainerAware {
    *   The route provider.
    * @param \Symfony\Component\Routing\Generator\UrlGeneratorInterface $url_generator
    *   The url generator.
-   * @param \Drupal\Core\ParamConverter\ParamConverterManager $paramconverter_manager
+   * @param \Drupal\Core\ParamConverter\ParamConverterManagerInterface $paramconverter_manager
    *   The param converter manager.
    */
-  public function __construct(RouteProviderInterface $route_provider, UrlGeneratorInterface $url_generator, ParamConverterManager $paramconverter_manager) {
+  public function __construct(RouteProviderInterface $route_provider, UrlGeneratorInterface $url_generator, ParamConverterManagerInterface $paramconverter_manager) {
     $this->routeProvider = $route_provider;
     $this->urlGenerator = $url_generator;
     $this->paramConverterManager = $paramconverter_manager;
@@ -118,9 +118,15 @@ class AccessManager extends ContainerAware {
    *
    * @param string $service_id
    *   The ID of the service in the Container that provides a check.
+   * @param array $applies_checks
+   *   (optional) An array of route requirement keys the checker service applies
+   *   to.
    */
-  public function addCheckService($service_id) {
+  public function addCheckService($service_id, array $applies_checks = array()) {
     $this->checkIds[] = $service_id;
+    foreach ($applies_checks as $applies_check) {
+      $this->staticRequirementMap[$applies_check][] = $service_id;
+    }
   }
 
   /**
@@ -130,7 +136,7 @@ class AccessManager extends ContainerAware {
    *   A collection of routes to apply checks to.
    */
   public function setChecks(RouteCollection $routes) {
-    $this->loadAccessRequirementMap();
+    $this->loadDynamicRequirementMap();
     foreach ($routes as $route) {
       if ($checks = $this->applies($route)) {
         $route->setOption('_access_checks', $checks);
@@ -159,13 +165,11 @@ class AccessManager extends ContainerAware {
           $checks[] = $service_id;
         }
       }
-      // This means appliesTo() method was empty. Iterate through all checkers.
-      else {
-        foreach ($this->dynamicRequirementMap as $service_id) {
-          if ($this->checks[$service_id]->applies($route)) {
-            $checks[] = $service_id;
-          }
-        }
+    }
+    // Finally, see if any dynamic access checkers apply.
+    foreach ($this->dynamicRequirementMap as $service_id) {
+      if ($this->checks[$service_id]->applies($route)) {
+        $checks[] = $service_id;
       }
     }
 
@@ -195,17 +199,17 @@ class AccessManager extends ContainerAware {
       $route = $this->routeProvider->getRouteByName($route_name, $parameters);
       if (empty($route_request)) {
         // Create a request and copy the account from the current request.
-        $route_request = RequestHelper::duplicate($this->request, $this->urlGenerator->generate($route_name, $parameters));
-        $defaults = $parameters;
+        $defaults = $parameters + $route->getDefaults();
+        $route_request = RequestHelper::duplicate($this->request, $this->urlGenerator->generate($route_name, $defaults));
         $defaults[RouteObjectInterface::ROUTE_OBJECT] = $route;
-        $route_request->attributes->add($this->paramConverterManager->enhance($defaults, $route_request));
+        $route_request->attributes->add($this->paramConverterManager->convert($defaults, $route_request));
       }
       return $this->check($route, $route_request, $account);
     }
     catch (RouteNotFoundException $e) {
       return FALSE;
     }
-    catch (NotFoundHttpException $e) {
+    catch (ParamNotConvertedException $e) {
       return FALSE;
     }
   }
@@ -331,19 +335,24 @@ class AccessManager extends ContainerAware {
       throw new \InvalidArgumentException(sprintf('No check has been registered for %s', $service_id));
     }
 
-    $this->checks[$service_id] = $this->container->get($service_id);
+    $check = $this->container->get($service_id);
+
+    if (!($check instanceof RoutingAccessInterface)) {
+      throw new AccessException('All access checks must implement AccessInterface.');
+    }
+
+    $this->checks[$service_id] = $check;
   }
 
   /**
    * Compiles a mapping of requirement keys to access checker service IDs.
    */
-  public function loadAccessRequirementMap() {
-    if (isset($this->staticRequirementMap, $this->dynamicRequirementMap)) {
+  public function loadDynamicRequirementMap() {
+    if (isset($this->dynamicRequirementMap)) {
       return;
     }
 
     // Set them here, so we can use the isset() check above.
-    $this->staticRequirementMap = array();
     $this->dynamicRequirementMap = array();
 
     foreach ($this->checkIds as $service_id) {
@@ -351,14 +360,8 @@ class AccessManager extends ContainerAware {
         $this->loadCheck($service_id);
       }
 
-      // Empty arrays will not register anything.
-      if (is_subclass_of($this->checks[$service_id], 'Drupal\Core\Access\StaticAccessCheckInterface')) {
-        foreach ((array) $this->checks[$service_id]->appliesTo() as $key) {
-          $this->staticRequirementMap[$key][] = $service_id;
-        }
-      }
-      // Add the service ID to a the regular that will be iterated over.
-      else {
+      // Add the service ID to an array that will be iterated over.
+      if ($this->checks[$service_id] instanceof AccessCheckInterface) {
         $this->dynamicRequirementMap[] = $service_id;
       }
     }

@@ -7,8 +7,8 @@
 
 namespace Drupal\book\Access;
 
-use Drupal\book\BookManager;
-use Drupal\Core\Access\StaticAccessCheckInterface;
+use Drupal\book\BookManagerInterface;
+use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,30 +16,23 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Determines whether the requested node can be removed from its book.
  */
-class BookNodeIsRemovableAccessCheck implements StaticAccessCheckInterface {
+class BookNodeIsRemovableAccessCheck implements AccessInterface {
 
   /**
    * Book Manager Service.
    *
-   * @var \Drupal\book\BookManager
+   * @var \Drupal\book\BookManagerInterface
    */
   protected $bookManager;
 
   /**
    * Constructs a BookNodeIsRemovableAccessCheck object.
    *
-   * @param \Drupal\book\BookManager $book_manager
+   * @param \Drupal\book\BookManagerInterface $book_manager
    *   Book Manager Service.
    */
-  public function __construct(BookManager $book_manager) {
+  public function __construct(BookManagerInterface $book_manager) {
     $this->bookManager = $book_manager;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function appliesTo() {
-    return array('_access_book_removable');
   }
 
   /**

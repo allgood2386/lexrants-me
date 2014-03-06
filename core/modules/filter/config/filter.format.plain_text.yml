@@ -4,7 +4,6 @@
 # - may be modified by installation profiles to have other properties.
 format: plain_text
 name: 'Plain text'
-uuid: 7dd77dca-6a80-4538-b10d-133fa66d42f0
 status: true
 weight: 10
 roles:
@@ -15,14 +14,14 @@ filters:
   # Escape all HTML.
   filter_html_escape:
     id: filter_html_escape
-    module: filter
+    provider: filter
     status: true
     weight: -10
     settings: {  }
   # Convert URLs into links.
   filter_url:
     id: filter_url
-    module: filter
+    provider: filter
     status: true
     weight: 0
     settings:
@@ -30,7 +29,7 @@ filters:
   # Convert linebreaks into paragraphs.
   filter_autop:
     id: filter_autop
-    module: filter
+    provider: filter
     status: true
     weight: 0
     settings: {  }

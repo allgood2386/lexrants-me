@@ -7,8 +7,8 @@
 
 namespace Drupal\edit\Access;
 
-use Drupal\Core\Access\StaticAccessCheckInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,7 +18,7 @@ use Drupal\Core\Entity\EntityInterface;
 /**
  * Access check for editing entities.
  */
-class EditEntityAccessCheck implements StaticAccessCheckInterface {
+class EditEntityAccessCheck implements AccessInterface {
 
   /**
    * The entity manager.
@@ -40,19 +40,13 @@ class EditEntityAccessCheck implements StaticAccessCheckInterface {
   /**
    * {@inheritdoc}
    */
-  public function appliesTo() {
-    // @see edit.routing.yml
-    return array('_access_edit_entity');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function access(Route $route, Request $request, AccountInterface $account) {
     // @todo Request argument validation and object loading should happen
     //   elsewhere in the request processing pipeline:
     //   http://drupal.org/node/1798214.
-    $this->validateAndUpcastRequestAttributes($request);
+    if (!$this->validateAndUpcastRequestAttributes($request)) {
+      return static::KILL;
+    }
 
     return $this->accessEditEntity($request->attributes->get('entity'), $account)  ? static::ALLOW : static::DENY;
   }
@@ -73,14 +67,16 @@ class EditEntityAccessCheck implements StaticAccessCheckInterface {
       $entity_id = $entity;
       $entity_type = $request->attributes->get('entity_type');
       if (!$entity_type || !$this->entityManager->getDefinition($entity_type)) {
-        throw new NotFoundHttpException();
+        return FALSE;
       }
       $entity = $this->entityManager->getStorageController($entity_type)->load($entity_id);
       if (!$entity) {
-        throw new NotFoundHttpException();
+        return FALSE;
       }
       $request->attributes->set('entity', $entity);
     }
+
+    return TRUE;
   }
 
 }

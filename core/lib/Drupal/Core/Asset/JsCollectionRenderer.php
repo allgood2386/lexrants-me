@@ -7,6 +7,7 @@
 namespace Drupal\Core\Asset;
 
 use Drupal\Core\KeyValueStore\StateInterface;
+use Drupal\Component\Utility\Json;
 
 /**
  * Renders JavaScript assets.
@@ -39,7 +40,7 @@ class JsCollectionRenderer implements AssetCollectionRendererInterface {
     // A dummy query-string is added to filenames, to gain control over
     // browser-caching. The string changes on every update or full cache
     // flush, forcing browsers to load a new copy of the files, as the
-    // URL changed. Files that should not be cached (see drupal_add_js())
+    // URL changed. Files that should not be cached (see _drupal_add_js())
     // get REQUEST_TIME as query-string instead, to enforce reload on every
     // page request.
     $default_query_string = $this->state->get('system.css_js_query_string') ?: '0';
@@ -67,7 +68,7 @@ class JsCollectionRenderer implements AssetCollectionRendererInterface {
       switch ($js_asset['type']) {
         case 'setting':
           $element['#value_prefix'] = $embed_prefix;
-          $element['#value'] = 'var drupalSettings = ' . drupal_json_encode(drupal_merge_js_settings($js_asset['data'])) . ";";
+          $element['#value'] = 'var drupalSettings = ' . Json::encode(drupal_merge_js_settings($js_asset['data'])) . ";";
           $element['#value_suffix'] = $embed_suffix;
           break;
 

@@ -10,8 +10,6 @@ namespace Drupal\rest\Plugin\views\style;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\style\StylePluginBase;
-use Drupal\views\Annotation\ViewsStyle;
-use Drupal\Core\Annotation\Translation;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -97,7 +95,7 @@ class Serializer extends StylePluginBase {
       '#type' => 'checkboxes',
       '#title' => t('Accepted request formats'),
       '#description' => t('Request formats that will be allowed in responses. If none are selected all formats will be allowed.'),
-      '#options' => drupal_map_assoc($this->formats),
+      '#options' => array_combine($this->formats, $this->formats),
       '#default_value' => $this->options['formats'],
     );
   }

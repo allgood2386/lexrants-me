@@ -142,7 +142,7 @@ abstract class FileTransfer {
    * @see http://php.net/chmod
    */
   public final function chmod($path, $mode, $recursive = FALSE) {
-    if (!in_array('Drupal\Core\FileTransfer\ChmodInterface', class_implements(get_class($this)))) {
+    if (!($this instanceof ChmodInterface)) {
       throw new FileTransferException('Unable to change file permissions');
     }
     $path = $this->sanitizePath($path);
@@ -405,7 +405,6 @@ abstract class FileTransfer {
     $form['advanced'] = array(
       '#type' => 'details',
       '#title' => t('Advanced settings'),
-      '#collapsed' => TRUE,
     );
     $form['advanced']['hostname'] = array(
       '#type' => 'textfield',

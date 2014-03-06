@@ -8,20 +8,17 @@
 namespace Drupal\block\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
 use Drupal\block\BlockPluginBag;
 use Drupal\block\BlockInterface;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Config\Entity\EntityWithPluginBagInterface;
 
 /**
  * Defines a Block configuration entity class.
  *
- * @EntityType(
+ * @ConfigEntityType(
  *   id = "block",
  *   label = @Translation("Block"),
  *   controllers = {
- *     "storage" = "Drupal\Core\Config\Entity\ConfigStorageController",
  *     "access" = "Drupal\block\BlockAccessController",
  *     "view_builder" = "Drupal\block\BlockViewBuilder",
  *     "list" = "Drupal\block\BlockListController",
@@ -30,19 +27,19 @@ use Drupal\Core\Entity\EntityStorageControllerInterface;
  *       "delete" = "Drupal\block\Form\BlockDeleteForm"
  *     }
  *   },
- *   config_prefix = "block.block",
+ *   admin_permission = "administer blocks",
  *   fieldable = FALSE,
  *   entity_keys = {
  *     "id" = "id",
- *     "label" = "label",
- *     "uuid" = "uuid"
+ *     "label" = "label"
  *   },
  *   links = {
+ *     "delete-form" = "block.admin_block_delete",
  *     "edit-form" = "block.admin_edit"
  *   }
  * )
  */
-class Block extends ConfigEntityBase implements BlockInterface {
+class Block extends ConfigEntityBase implements BlockInterface, EntityWithPluginBagInterface {
 
   /**
    * The ID of the block.
@@ -94,6 +91,11 @@ class Block extends ConfigEntityBase implements BlockInterface {
   protected $pluginBag;
 
   /**
+   * {@inheritdoc}
+   */
+  protected $pluginConfigKey = 'settings';
+
+  /**
    * The visibility settings.
    *
    * @var array
@@ -101,25 +103,26 @@ class Block extends ConfigEntityBase implements BlockInterface {
   protected $visibility;
 
   /**
-   * Overrides \Drupal\Core\Config\Entity\ConfigEntityBase::__construct();
+   * {@inheritdoc}
    */
-  public function __construct(array $values, $entity_type) {
-    parent::__construct($values, $entity_type);
-
-    $this->pluginBag = new BlockPluginBag(\Drupal::service('plugin.manager.block'), array($this->plugin), $this->get('settings'), $this->id());
+  public function getPlugin() {
+    return $this->getPluginBag()->get($this->plugin);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getPlugin() {
-    return $this->pluginBag->get($this->plugin);
+  public function getPluginBag() {
+    if (!$this->pluginBag) {
+      $this->pluginBag = new BlockPluginBag(\Drupal::service('plugin.manager.block'), $this->plugin, $this->get('settings'), $this->id());
+    }
+    return $this->pluginBag;
   }
 
   /**
    * Overrides \Drupal\Core\Entity\Entity::label();
    */
-  public function label($langcode = NULL) {
+  public function label() {
     $settings = $this->get('settings');
     if ($settings['label']) {
       return $settings['label'];
@@ -147,15 +150,6 @@ class Block extends ConfigEntityBase implements BlockInterface {
       $properties[$name] = $this->get($name);
     }
     return $properties;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function preSave(EntityStorageControllerInterface $storage_controller) {
-    parent::preSave($storage_controller);
-
-    $this->set('settings', $this->getPlugin()->getConfiguration());
   }
 
   /**

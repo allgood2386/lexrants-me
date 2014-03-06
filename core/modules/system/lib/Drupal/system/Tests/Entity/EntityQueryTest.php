@@ -58,13 +58,12 @@ class EntityQueryTest extends EntityUnitTestBase {
   function setUp() {
     parent::setUp();
     $this->installSchema('entity_test', array('entity_test_mulrev', 'entity_test_mulrev_revision', 'entity_test_mulrev_property_data', 'entity_test_mulrev_property_revision'));
-    $this->installSchema('system', array('variable'));
     $this->installConfig(array('language'));
 
     $figures = drupal_strtolower($this->randomName());
     $greetings = drupal_strtolower($this->randomName());
     foreach (array($figures => 'shape', $greetings => 'text') as $field_name => $field_type) {
-      $field = entity_create('field_entity', array(
+      $field = entity_create('field_config', array(
         'name' => $field_name,
         'entity_type' => 'entity_test_mulrev',
         'type' => $field_type,
@@ -83,7 +82,7 @@ class EntityQueryTest extends EntityUnitTestBase {
       } while ($bundles && strtolower($bundles[0]) >= strtolower($bundle));
       entity_test_create_bundle($bundle);
       foreach ($fields as $field) {
-        entity_create('field_instance', array(
+        entity_create('field_instance_config', array(
           'field_name' => $field->name,
           'entity_type' => 'entity_test_mulrev',
           'bundle' => $bundle,
@@ -126,8 +125,6 @@ class EntityQueryTest extends EntityUnitTestBase {
       'name' => $this->randomString(),
     ));
     language_save($langcode);
-    $field_langcodes = &drupal_static('field_available_languages');
-    $field_langcodes['entity_test_mulrev'][$greetings] = array('tr', 'pl');
     // Calculate the cartesian product of the unit array by looking at the
     // bits of $i and add the unit at the bits that are 1. For example,
     // decimal 13 is binary 1101 so unit 3,2 and 0 will be added to the
@@ -430,7 +427,7 @@ class EntityQueryTest extends EntityUnitTestBase {
   protected function testCount() {
     // Create a field with the same name in a different entity type.
     $field_name = $this->figures;
-    $field = entity_create('field_entity', array(
+    $field = entity_create('field_config', array(
       'name' => $field_name,
       'entity_type' => 'entity_test',
       'type' => 'shape',
@@ -439,7 +436,7 @@ class EntityQueryTest extends EntityUnitTestBase {
     ));
     $field->save();
     $bundle = $this->randomName();
-    entity_create('field_instance', array(
+    entity_create('field_instance_config', array(
       'field_name' => $field_name,
       'entity_type' => 'entity_test',
       'bundle' => $bundle,

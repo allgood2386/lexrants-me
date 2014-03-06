@@ -9,8 +9,6 @@ namespace Drupal\ckeditor\Plugin\CKEditorPlugin;
 
 use Drupal\ckeditor\CKEditorPluginBase;
 use Drupal\ckeditor\CKEditorPluginConfigurableInterface;
-use Drupal\ckeditor\Annotation\CKEditorPlugin;
-use Drupal\Core\Annotation\Translation;
 use Drupal\editor\Entity\Editor;
 
 /**
@@ -36,7 +34,7 @@ class DrupalImage extends CKEditorPluginBase implements CKEditorPluginConfigurab
    */
   public function getLibraries(Editor $editor) {
     return array(
-      array('system', 'drupal.ajax'),
+      array('core', 'drupal.ajax'),
     );
   }
 
@@ -84,7 +82,6 @@ class DrupalImage extends CKEditorPluginBase implements CKEditorPluginConfigurab
    *
    * @see \Drupal\editor\Form\EditorImageDialog
    * @see editor_image_upload_settings_form()
-   * @see editor_image_upload_settings_validate()
    */
   function validateImageUploadSettings(array $element, array &$form_state) {
     $settings = &$form_state['values']['editor']['settings']['plugins']['drupalimage']['image_upload'];

@@ -8,19 +8,16 @@
 namespace Drupal\custom_block\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\custom_block\CustomBlockTypeInterface;
 
 /**
  * Defines the custom block type entity.
  *
- * @EntityType(
+ * @ConfigEntityType(
  *   id = "custom_block_type",
  *   label = @Translation("Custom block type"),
  *   controllers = {
- *     "storage" = "Drupal\Core\Config\Entity\ConfigStorageController",
  *     "form" = {
  *       "default" = "Drupal\custom_block\CustomBlockTypeFormController",
  *       "add" = "Drupal\custom_block\CustomBlockTypeFormController",
@@ -30,14 +27,14 @@ use Drupal\custom_block\CustomBlockTypeInterface;
  *     "list" = "Drupal\custom_block\CustomBlockTypeListController"
  *   },
  *   admin_permission = "administer blocks",
- *   config_prefix = "custom_block.type",
+ *   config_prefix = "type",
  *   bundle_of = "custom_block",
  *   entity_keys = {
  *     "id" = "id",
- *     "label" = "label",
- *     "uuid" = "uuid"
+ *     "label" = "label"
  *   },
  *   links = {
+ *     "delete-form" = "custom_block.type_delete",
  *     "edit-form" = "custom_block.type_edit"
  *   }
  * )

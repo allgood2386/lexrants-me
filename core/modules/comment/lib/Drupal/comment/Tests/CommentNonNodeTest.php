@@ -157,12 +157,12 @@ class CommentNonNodeTest extends WebTestBase {
   function commentExists(CommentInterface $comment = NULL, $reply = FALSE) {
     if ($comment) {
       $regex = '/' . ($reply ? '<div class="indented">(.*?)' : '');
-      $regex .= '<a id="comment-' . $comment->id() . '"(.*?)'; // Comment anchor.
-      $regex .= $comment->subject->value . '(.*?)'; // Match subject.
-      $regex .= $comment->comment_body->value . '(.*?)'; // Match comment.
+      $regex .= '<a id="comment-' . $comment->id() . '"(.*?)';
+      $regex .= $comment->getSubject() . '(.*?)';
+      $regex .= $comment->comment_body->value . '(.*?)';
       $regex .= '/s';
 
-      return (boolean)preg_match($regex, $this->drupalGetContent());
+      return (boolean) preg_match($regex, $this->drupalGetContent());
     }
     else {
       return FALSE;
@@ -305,9 +305,6 @@ class CommentNonNodeTest extends WebTestBase {
       'view test entity' => TRUE,
       'skip comment approval' => FALSE,
     ));
-    // We've changed role permissions, so need to reset render cache.
-    // @todo Revisit after https://drupal.org/node/2099105
-    \Drupal::entityManager()->getViewBuilder('entity_test')->resetCache(array($this->entity));
     $this->drupalGet('entity_test/' . $this->entity->id());
     $this->assertPattern('@<h2[^>]*>Comments</h2>@', 'Comments were displayed.');
     $this->assertLink('Log in', 0, 'Link to log in was found.');
@@ -324,9 +321,6 @@ class CommentNonNodeTest extends WebTestBase {
       'skip comment approval' => TRUE,
       'view test entity' => TRUE,
     ));
-    // We've changed role permissions, so need to reset render cache.
-    // @todo Revisit after https://drupal.org/node/2099105
-    \Drupal::entityManager()->getViewBuilder('entity_test')->resetCache(array($this->entity));
     $this->drupalGet('entity_test/' . $this->entity->id());
     $this->assertNoPattern('@<h2[^>]*>Comments</h2>@', 'Comments were not displayed.');
     $this->assertFieldByName('subject', '', 'Subject field found.');
@@ -334,7 +328,7 @@ class CommentNonNodeTest extends WebTestBase {
 
     $this->drupalGet('comment/reply/entity_test/' . $this->entity->id() . '/comment/' . $comment1->id());
     $this->assertText('You are not authorized to view comments');
-    $this->assertNoText($comment1->subject->value, 'Comment not displayed.');
+    $this->assertNoText($comment1->getSubject(), 'Comment not displayed.');
 
     // Test comment field widget changes.
     $limited_user = $this->drupalCreateUser(array(

@@ -7,23 +7,19 @@
 
 namespace Drupal\node\Plugin\Search;
 
-use Drupal\Core\Annotation\Translation;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Database\Query\SelectExtender;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\StateInterface;
 use Drupal\Core\Language\Language;
-use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Access\AccessibleInterface;
 use Drupal\Core\Database\Query\Condition;
-use Drupal\search\Annotation\SearchPlugin;
-use Drupal\search\Plugin\SearchPluginBase;
+use Drupal\node\NodeInterface;
+use Drupal\search\Plugin\ConfigurableSearchPluginBase;
 use Drupal\search\Plugin\SearchIndexingInterface;
-
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -31,11 +27,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @SearchPlugin(
  *   id = "node_search",
- *   title = @Translation("Content"),
- *   path = "node"
+ *   title = @Translation("Content")
  * )
  */
-class NodeSearch extends SearchPluginBase implements AccessibleInterface, SearchIndexingInterface, PluginFormInterface {
+class NodeSearch extends ConfigurableSearchPluginBase implements AccessibleInterface, SearchIndexingInterface {
 
   /**
    * A database connection object.
@@ -80,6 +75,13 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
   protected $account;
 
   /**
+   * An array of additional rankings from hook_ranking().
+   *
+   * @var array
+   */
+  protected $rankings;
+
+  /**
    * The list of options and info for advanced search filters.
    *
    * Each entry in the array has the option as the key and and for its value, an
@@ -94,7 +96,7 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
    */
   protected $advanced = array(
     'type' => array('column' => 'n.type'),
-    'langcode' => array('column' => 'i.langcode'),
+    'language' => array('column' => 'i.langcode'),
     'author' => array('column' => 'n.uid'),
     'term' => array('column' => 'ti.tid', 'join' => array('table' => 'taxonomy_index', 'alias' => 'ti', 'condition' => 'n.nid = ti.nid')),
   );
@@ -222,6 +224,10 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
       // Add the language code of the indexed item to the result of the query,
       // since the node will be rendered using the respective language.
       ->fields('i', array('langcode'))
+      // And since SearchQuery makes these into GROUP BY queries, if we add
+      // a field, for PostgreSQL we also need to make it an aggregate or a
+      // GROUP BY. In this case, we want GROUP BY.
+      ->groupBy('i.langcode')
       ->limit(10)
       ->execute();
 
@@ -230,6 +236,7 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
 
     foreach ($find as $item) {
       // Render the node.
+      /** @var \Drupal\node\NodeInterface $node */
       $node = $node_storage->load($item->sid)->getTranslation($item->langcode);
       $build = $node_render->view($node, 'search_result', $item->langcode);
       unset($build['#theme']);
@@ -241,13 +248,12 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
       $extra = $this->moduleHandler->invokeAll('node_search_result', array($node, $item->langcode));
 
       $language = language_load($item->langcode);
-      $uri = $node->uri();
       $username = array(
         '#theme' => 'username',
-        '#account' => $node->getAuthor(),
+        '#account' => $node->getOwner(),
       );
       $results[] = array(
-        'link' => url($uri['path'], array_merge($uri['options'], array('absolute' => TRUE, 'language' => $language))),
+        'link' => $node->url('canonical', array('absolute' => TRUE, 'language' => $language)),
         'type' => check_plain($this->entityManager->getStorageController('node_type')->load($node->bundle())->label()),
         'title' => $node->label(),
         'user' => drupal_render($username),
@@ -263,17 +269,17 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
   }
 
   /**
-   * Gathers the rankings from the the hook_ranking() implementations.
+   * Adds the configured rankings to the search query.
    *
    * @param $query
    *   A query object that has been extended with the Search DB Extender.
    */
   protected function addNodeRankings(SelectExtender $query) {
-    if ($ranking = $this->moduleHandler->invokeAll('ranking')) {
+    if ($ranking = $this->getRankings()) {
       $tables = &$query->getTables();
       foreach ($ranking as $rank => $values) {
-        // @todo - move rank out of drupal variables.
-        if ($node_rank = variable_get('node_rank_' . $rank, 0)) {
+        if (isset($this->configuration['rankings'][$rank]) && !empty($this->configuration['rankings'][$rank])) {
+          $node_rank = $this->configuration['rankings'][$rank];
           // If the table defined in the ranking isn't already joined, then add it.
           if (isset($values['join']) && !isset($tables[$values['join']['alias']])) {
             $query->addJoin($values['join']['type'], $values['join']['table'], $values['join']['alias'], $values['join']['on']);
@@ -291,7 +297,7 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
   public function updateIndex() {
     $limit = (int) $this->searchSettings->get('index.cron_limit');
 
-    $result = $this->database->queryRange("SELECT DISTINCT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = :type AND d.sid = n.nid WHERE d.sid IS NULL OR d.reindex <> 0 ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':type' => $this->getPluginId()), array('target' => 'slave'));
+    $result = $this->database->queryRange("SELECT DISTINCT n.nid, d.reindex FROM {node} n LEFT JOIN {search_dataset} d ON d.type = :type AND d.sid = n.nid WHERE d.sid IS NULL OR d.reindex <> 0 ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':type' => $this->getPluginId()), array('target' => 'slave'));
     $nids = $result->fetchCol();
     if (!$nids) {
       return;
@@ -314,10 +320,10 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
   /**
    * Indexes a single node.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $node
+   * @param \Drupal\node\NodeInterface $node
    *   The node to index.
    */
-  protected function indexNode(EntityInterface $node) {
+  protected function indexNode(NodeInterface $node) {
     // Save the changed time of the most recent indexed node, for the search
     // results half-life calculation.
     $this->state->set('node.cron_last', $node->getChangedTime());
@@ -373,14 +379,12 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
     $form['advanced'] = array(
       '#type' => 'details',
       '#title' => t('Advanced search'),
-      '#collapsed' => TRUE,
       '#attributes' => array('class' => array('search-advanced')),
       '#access' => $this->account && $this->account->hasPermission('use advanced search'),
     );
     $form['advanced']['keywords-fieldset'] = array(
       '#type' => 'fieldset',
       '#title' => t('Keywords'),
-      '#collapsible' => FALSE,
     );
     $form['advanced']['keywords'] = array(
       '#prefix' => '<div class="criterion">',
@@ -406,12 +410,10 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
     );
 
     // Add node types.
-    $node_types = $this->entityManager->getStorageController('node_type')->loadMultiple();
     $types = array_map('check_plain', node_type_get_names());
     $form['advanced']['types-fieldset'] = array(
       '#type' => 'fieldset',
       '#title' => t('Types'),
-      '#collapsible' => FALSE,
     );
     $form['advanced']['types-fieldset']['type'] = array(
       '#type' => 'checkboxes',
@@ -430,7 +432,8 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
 
     // Add languages.
     $language_options = array();
-    foreach (language_list(Language::STATE_ALL) as $langcode => $language) {
+    $language_list = \Drupal::languageManager()->getLanguages(Language::STATE_ALL);
+    foreach ($language_list as $langcode => $language) {
       // Make locked languages appear special in the list.
       $language_options[$langcode] = $language->locked ? t('- @name -', array('@name' => $language->name)) : $language->name;
     }
@@ -438,8 +441,6 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
       $form['advanced']['lang-fieldset'] = array(
         '#type' => 'fieldset',
         '#title' => t('Languages'),
-        '#collapsible' => FALSE,
-        '#collapsed' => FALSE,
       );
       $form['advanced']['lang-fieldset']['language'] = array(
         '#type' => 'checkboxes',
@@ -506,13 +507,41 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
     if (!empty($keys)) {
       form_set_value($form['basic']['processed_keys'], trim($keys), $form_state);
     }
-    $path = $form_state['action'] . '/' . $keys;
     $options = array();
     if ($filters) {
       $options['query'] = array('f' => $filters);
     }
 
-    $form_state['redirect'] = array($path, $options);
+    $form_state['redirect_route'] = array(
+      'route_name' => 'search.view_' . $form_state['search_page_id'],
+      'route_parameters' => array(
+        'keys' => $keys,
+      ),
+      'options' => $options,
+    );
+  }
+
+  /**
+   * Gathers ranking definitions from hook_ranking().
+   *
+   * @return array
+   *   An array of ranking definitions.
+   */
+  protected function getRankings() {
+    if (!$this->rankings) {
+      $this->rankings = $this->moduleHandler->invokeAll('ranking');
+    }
+    return $this->rankings;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    $configuration = array(
+      'rankings' => array(),
+    );
+    return $configuration;
   }
 
   /**
@@ -523,20 +552,22 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
     $form['content_ranking'] = array(
       '#type' => 'details',
       '#title' => t('Content ranking'),
+      '#open' => TRUE,
     );
     $form['content_ranking']['#theme'] = 'node_search_admin';
     $form['content_ranking']['info'] = array(
-      '#value' => '<em>' . t('The following numbers control which properties the content search should favor when ordering the results. Higher numbers mean more influence, zero means the property is ignored. Changing these numbers does not require the search index to be rebuilt. Changes take effect immediately.') . '</em>'
+      '#markup' => '<p><em>' . $this->t('Influence is a numeric multiplier used in ordering search results. A higher number means the corresponding factor has more influence on search results; zero means the factor is ignored. Changing these numbers does not require the search index to be rebuilt. Changes take effect immediately.') . '</em></p>'
     );
 
     // Note: reversed to reflect that higher number = higher ranking.
-    $options = drupal_map_assoc(range(0, 10));
-    foreach ($this->moduleHandler->invokeAll('ranking') as $var => $values) {
-      $form['content_ranking']['factors']['node_rank_' . $var] = array(
+    $range = range(0, 10);
+    $options = array_combine($range, $range);
+    foreach ($this->getRankings() as $var => $values) {
+      $form['content_ranking']['factors']["rankings_$var"] = array(
         '#title' => $values['title'],
         '#type' => 'select',
         '#options' => $options,
-        '#default_value' => variable_get('node_rank_' . $var, 0),
+        '#default_value' => isset($this->configuration['rankings'][$var]) ? $this->configuration['rankings'][$var] : 0,
       );
     }
     return $form;
@@ -545,18 +576,15 @@ class NodeSearch extends SearchPluginBase implements AccessibleInterface, Search
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(array &$form, array &$form_state) {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function submitConfigurationForm(array &$form, array &$form_state) {
-    foreach ($this->moduleHandler->invokeAll('ranking') as $var => $values) {
-      if (isset($form_state['values']['node_rank_' . $var])) {
-        // @todo Fix when https://drupal.org/node/1831632 is in.
-        variable_set('node_rank_' . $var, $form_state['values']['node_rank_' . $var]);
+    foreach ($this->getRankings() as $var => $values) {
+      if (!empty($form_state['values']["rankings_$var"])) {
+        $this->configuration['rankings'][$var] = $form_state['values']["rankings_$var"];
+      }
+      else {
+        unset($this->configuration['rankings'][$var]);
       }
     }
   }
+
 }

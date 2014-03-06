@@ -182,7 +182,6 @@ class UserRegistrationTest extends WebTestBase {
     $new_user = reset($accounts);
     $this->assertEqual($new_user->getUsername(), $name, 'Username matches.');
     $this->assertEqual($new_user->getEmail(), $mail, 'E-mail address matches.');
-    $this->assertEqual($new_user->theme->value, '', 'Correct theme field.');
     $this->assertEqual($new_user->getSignature(), '', 'Correct signature field.');
     $this->assertTrue(($new_user->getCreatedTime() > REQUEST_TIME - 20 ), 'Correct creation time.');
     $this->assertEqual($new_user->isActive(), $config_user_settings->get('register') == USER_REGISTER_VISITORS ? 1 : 0, 'Correct status field.');
@@ -197,14 +196,14 @@ class UserRegistrationTest extends WebTestBase {
    */
   function testRegistrationWithUserFields() {
     // Create a field, and an instance on 'user' entity type.
-    $field = entity_create('field_entity', array(
+    $field = entity_create('field_config', array(
       'name' => 'test_user_field',
       'entity_type' => 'user',
       'type' => 'test_field',
       'cardinality' => 1,
     ));
     $field->save();
-    $instance = entity_create('field_instance', array(
+    $instance = entity_create('field_instance_config', array(
       'field_name' => 'test_user_field',
       'entity_type' => 'user',
       'label' => 'Some user field',

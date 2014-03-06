@@ -7,20 +7,19 @@
 
 namespace Drupal\node\Entity;
 
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\node\NodeTypeInterface;
-use Drupal\Core\Entity\Annotation\EntityType;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Defines the Node type configuration entity.
  *
- * @EntityType(
+ * @ConfigEntityType(
  *   id = "node_type",
  *   label = @Translation("Content type"),
  *   controllers = {
- *     "storage" = "Drupal\Core\Config\Entity\ConfigStorageController",
  *     "access" = "Drupal\node\NodeTypeAccessController",
  *     "form" = {
  *       "add" = "Drupal\node\NodeTypeFormController",
@@ -30,15 +29,16 @@ use Drupal\Core\Annotation\Translation;
  *     "list" = "Drupal\node\NodeTypeListController",
  *   },
  *   admin_permission = "administer content types",
- *   config_prefix = "node.type",
+ *   config_prefix = "type",
  *   bundle_of = "node",
  *   entity_keys = {
  *     "id" = "type",
- *     "label" = "name",
- *     "uuid" = "uuid"
+ *     "label" = "name"
  *   },
  *   links = {
- *     "edit-form" = "node.type_edit"
+ *     "add-form" = "node.add",
+ *     "edit-form" = "node.type_edit",
+ *     "delete-form" = "node.type_delete_confirm"
  *   }
  * )
  */
@@ -165,7 +165,7 @@ class NodeType extends ConfigEntityBase implements NodeTypeInterface {
 
     if (!$update) {
       // Clear the node type cache, so the new type appears.
-      \Drupal::cache()->deleteTags(array('node_types' => TRUE));
+      Cache::deleteTags(array('node_types' => TRUE));
 
       entity_invoke_bundle_hook('create', 'node', $this->id());
 
@@ -178,7 +178,7 @@ class NodeType extends ConfigEntityBase implements NodeTypeInterface {
     }
     elseif ($this->getOriginalId() != $this->id()) {
       // Clear the node type cache to reflect the rename.
-      \Drupal::cache()->deleteTags(array('node_types' => TRUE));
+      Cache::deleteTags(array('node_types' => TRUE));
 
       $update_count = node_type_update_nodes($this->getOriginalId(), $this->id());
       if ($update_count) {
@@ -194,7 +194,10 @@ class NodeType extends ConfigEntityBase implements NodeTypeInterface {
     }
     else {
       // Invalidate the cache tag of the updated node type only.
-      cache()->invalidateTags(array('node_type' => $this->id()));
+      Cache::invalidateTags(array('node_type' => $this->id()));
+
+      // Invalidate the render cache for all nodes.
+      \Drupal::entityManager()->getViewBuilder('node')->resetCache();
     }
   }
 
@@ -209,6 +212,28 @@ class NodeType extends ConfigEntityBase implements NodeTypeInterface {
     foreach ($entities as $entity) {
       entity_invoke_bundle_hook('delete', 'node', $entity->id());
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function preCreate(EntityStorageControllerInterface $storage_controller, array &$values) {
+    parent::preCreate($storage_controller, $values);
+
+    // Ensure default values are set.
+    if (!isset($values['settings']['node'])) {
+      $values['settings']['node'] = array();
+    }
+    $values['settings']['node'] = NestedArray::mergeDeep(array(
+      'options' => array(
+        'status' => TRUE,
+        'promote' => TRUE,
+        'sticky' => FALSE,
+        'revision' => FALSE,
+      ),
+      'preview' => DRUPAL_OPTIONAL,
+      'submitted' => TRUE,
+    ), $values['settings']['node']);
   }
 
 }

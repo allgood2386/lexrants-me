@@ -71,7 +71,8 @@ interface ModuleHandlerInterface {
    *
    * @param array $modules
    *   An array of module objects keyed by module name. Each object contains
-   *   information discovered during a Drupal\Core\SystemListing scan.
+   *   information discovered during a Drupal\Core\Extension\ExtensionDiscovery
+   *   scan.
    *
    * @return
    *   The same array with the new keys for each module:
@@ -80,7 +81,7 @@ interface ModuleHandlerInterface {
    *   - required_by: An array with the keys being the modules that will not work
    *     without this module.
    *
-   * @see \Drupal\Core\SystemListing
+   * @see \Drupal\Core\Extension\ExtensionDiscovery
    */
   public function buildModuleDependencies(array $modules);
 
@@ -185,7 +186,7 @@ interface ModuleHandlerInterface {
    * @return mixed
    *   The return value of the hook implementation.
    */
-  public function invoke($module, $hook, $args = array());
+  public function invoke($module, $hook, array $args = array());
 
   /**
    * Invokes a hook in all enabled modules that implement it.
@@ -199,7 +200,7 @@ interface ModuleHandlerInterface {
    *   An array of return values of the hook implementations. If modules return
    *   arrays from their implementations, those are merged into one array.
    */
-  public function invokeAll($hook, $args = array());
+  public function invokeAll($hook, array $args = array());
 
   /**
    * Passes alterable variables to specific hook_TYPE_alter() implementations.

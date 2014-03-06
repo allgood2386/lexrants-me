@@ -80,7 +80,7 @@ class EntityViewControllerTest extends WebTestBase {
 
     // Create an entity and save test value in field_test_text.
     $test_value = $this->randomName();
-    $entity = entity_create('entity_test', array());
+    $entity = entity_create('entity_test');
     $entity->field_test_text = $test_value;
     $entity->save();
 
@@ -101,7 +101,6 @@ class EntityViewControllerTest extends WebTestBase {
     ))->save();
     // Browse to the entity and verify that the attributes from both modules
     // are rendered in the field item HTML markup.
-    \Drupal::entityManager()->getViewBuilder('entity_test')->resetCache(array($entity));
     $this->drupalGet('entity_test/' . $entity->id());
     $xpath = $this->xpath('//div[@data-field-item-attr="foobar" and @property="schema:text" and text()=:value]', array(':value' => $test_value));
     $this->assertTrue($xpath, 'The field item attributes from both modules have been found in the rendered output of the field.');

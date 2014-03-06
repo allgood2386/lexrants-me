@@ -5,7 +5,7 @@
  * Adds contextual links to perform actions related to elements on a page.
  */
 
-use Drupal\Component\Utility\Url;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Template\Attribute;
 
 /**
@@ -18,6 +18,7 @@ function contextual_toolbar() {
   }
 
   $tab['contextual'] = array(
+    '#type' => 'toolbar_item',
     'tab' => array(
       '#type' => 'html_tag',
       '#tag' => 'button',
@@ -28,7 +29,6 @@ function contextual_toolbar() {
         'aria-pressed' => 'false',
       ),
     ),
-    '#theme_wrappers' => array('toolbar_tab_wrapper'),
     '#wrapper_attributes' => array(
       'class' => array('hidden', 'contextual-toolbar-tab'),
     ),
@@ -87,56 +87,6 @@ function contextual_permission() {
       'description' => t('Use contextual links to perform actions related to elements on a page.'),
     ),
   );
-}
-
-/**
- * Implements hook_library_info().
- */
-function contextual_library_info() {
-  $path = drupal_get_path('module', 'contextual');
-  $libraries['drupal.contextual-links'] = array(
-    'title' => 'Contextual Links',
-    'website' => 'http://drupal.org/node/473268',
-    'version' => \Drupal::VERSION,
-    'js' => array(
-      // Add the JavaScript, with a group and weight such that it will run
-      // before modules/contextual/js/contextual.toolbar.js.
-      $path . '/js/contextual.js' => array('group' => JS_LIBRARY, 'weight' => -2),
-    ),
-    'css' => array(
-      $path . '/css/contextual.module.css' => array(),
-      $path . '/css/contextual.theme.css' => array(),
-      $path . '/css/contextual.icons.css' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'jquery'),
-      array('system', 'drupal'),
-      array('system', 'drupalSettings'),
-      array('system', 'backbone'),
-      array('system', 'modernizr'),
-      array('system', 'jquery.once'),
-    ),
-  );
-  $libraries['drupal.contextual-toolbar'] = array(
-    'title' => 'Contextual Links Toolbar Tab',
-    'version' => \Drupal::VERSION,
-    'js' => array(
-      $path . '/js/contextual.toolbar.js' => array('group' => JS_LIBRARY),
-    ),
-    'css' => array(
-      $path . '/css/contextual.toolbar.css' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'jquery'),
-      array('system', 'drupal'),
-      array('system', 'backbone'),
-      array('system', 'jquery.once'),
-      array('system', 'drupal.tabbingmanager'),
-      array('system', 'drupal.announce'),
-    ),
-  );
-
-  return $libraries;
 }
 
 /**
@@ -259,7 +209,7 @@ function contextual_pre_render_links($element) {
     $items += $contextual_links_manager->getContextualLinksArrayByGroup($group, $args['route_parameters'], $args['metadata']);
   }
 
-  // Transform contextual links into parameters suitable for theme_links().
+  // Transform contextual links into parameters suitable for links.html.twig.
   $links = array();
   foreach ($items as $class => $item) {
     $class = drupal_html_class($class);
@@ -268,14 +218,11 @@ function contextual_pre_render_links($element) {
       'route_name' => isset($item['route_name']) ? $item['route_name'] : '',
       'route_parameters' => isset($item['route_parameters']) ? $item['route_parameters'] : array(),
     );
-    $item['localized_options'] += array('query' => array());
-    $item['localized_options']['query'] += drupal_get_destination();
-    $links[$class] += $item['localized_options'];
   }
   $element['#links'] = $links;
 
   // Allow modules to alter the renderable contextual links element.
-  drupal_alter('contextual_links_view', $element, $items);
+  \Drupal::moduleHandler()->alter('contextual_links_view', $element, $items);
 
   // If there are no links, tell drupal_render() to abort rendering.
   if (empty($element['#links'])) {
@@ -320,8 +267,8 @@ function contextual_contextual_links_view_alter(&$element, $items) {
 function _contextual_links_to_id($contextual_links) {
   $ids = array();
   foreach ($contextual_links as $group => $args) {
-    $route_parameters = Url::buildQuery($args['route_parameters']);
-    $metadata = Url::buildQuery((isset($args['metadata'])) ? $args['metadata'] : array());
+    $route_parameters = UrlHelper::buildQuery($args['route_parameters']);
+    $metadata = UrlHelper::buildQuery((isset($args['metadata'])) ? $args['metadata'] : array());
     $ids[] = "{$group}:{$route_parameters}:{$metadata}";
   }
   return implode('|', $ids);

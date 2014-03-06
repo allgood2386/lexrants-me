@@ -10,12 +10,12 @@ namespace Drupal\file\Tests;
 /**
  * Tests file usage functions.
  */
-class UsageTest extends FileManagedTestBase {
+class UsageTest extends FileManagedUnitTestBase {
   public static function getInfo() {
     return array(
       'name' => 'File usage',
       'description' => 'Tests the file usage functions.',
-      'group' => 'File API',
+      'group' => 'File Managed API',
     );
   }
 
@@ -134,7 +134,7 @@ class UsageTest extends FileManagedTestBase {
     db_update('file_managed')
       ->fields(array(
         'status' => 0,
-        'timestamp' => 1,
+        'changed' => 1,
       ))
       ->condition('fid', $temp_old->id())
       ->execute();
@@ -151,7 +151,7 @@ class UsageTest extends FileManagedTestBase {
     // Permanent file that is older than DRUPAL_MAXIMUM_TEMP_FILE_AGE.
     $perm_old = file_save_data('');
     db_update('file_managed')
-      ->fields(array('timestamp' => 1))
+      ->fields(array('changed' => 1))
       ->condition('fid', $temp_old->id())
       ->execute();
     $this->assertTrue(file_exists($perm_old->getFileUri()), 'Old permanent file was created correctly.');
@@ -161,7 +161,7 @@ class UsageTest extends FileManagedTestBase {
     $this->assertTrue(file_exists($perm_new->getFileUri()), 'New permanent file was created correctly.');
 
     // Run cron and then ensure that only the old, temp file was deleted.
-    $this->cronRun();
+    $this->container->get('cron')->run();
     $this->assertFalse(file_exists($temp_old->getFileUri()), 'Old temp file was correctly removed.');
     $this->assertTrue(file_exists($temp_new->getFileUri()), 'New temp file was correctly ignored.');
     $this->assertTrue(file_exists($perm_old->getFileUri()), 'Old permanent file was correctly ignored.');

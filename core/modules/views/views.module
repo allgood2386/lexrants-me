@@ -13,11 +13,12 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Language\Language;
 use Drupal\views\Plugin\Derivative\ViewsLocalTask;
+use Drupal\Core\Template\AttributeArray;
 use Drupal\views\ViewExecutable;
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\views\Entity\View;
 use Drupal\views\Views;
-use Drupal\field\FieldInstanceInterface;
+use Drupal\field\FieldInstanceConfigInterface;
 
 /**
  * Implements hook_help().
@@ -270,133 +271,20 @@ function views_permission() {
 }
 
 /**
- * Implement hook_menu_alter().
+ * Implements hook_menu_link_defaults_alter().
  */
-function views_menu_alter(&$callbacks) {
-  $our_paths = array();
-  $views = views_get_applicable_views('uses_hook_menu');
+function views_menu_link_defaults_alter(array &$links) {
+  // @todo Decide what to do with all the crazy logic in views_menu_alter() in
+  // https://drupal.org/node/2107533.
+  $views = Views::getApplicableViews('uses_hook_menu');
   foreach ($views as $data) {
+    /** @var \Drupal\views\ViewExecutable $view */
     list($view, $display_id) = $data;
-    $result = $view->executeHookMenu($display_id, $callbacks);
-    if (is_array($result)) {
-      // The menu system doesn't support having two otherwise
-      // identical paths with different placeholders.  So we
-      // want to remove the existing items from the menu whose
-      // paths would conflict with ours.
-
-      // First, we must find any existing menu items that may
-      // conflict.  We use a regular expression because we don't
-      // know what placeholders they might use.  Note that we
-      // first construct the regex itself by replacing %views_arg
-      // in the display path, then we use this constructed regex
-      // (which will be something like '#^(foo/%[^/]*/bar)$#') to
-      // search through the existing paths.
-      $regex = '#^(' . preg_replace('#%views_arg#', '%[^/]*', implode('|', array_keys($result))) . ')$#';
-      $matches = preg_grep($regex, array_keys($callbacks));
-
-      // Remove any conflicting items that were found.
-      foreach ($matches as $path) {
-        // Don't remove the paths we just added!
-        if (!isset($our_paths[$path])) {
-          unset($callbacks[$path]);
-        }
-      }
-      foreach ($result as $path => $item) {
-        if (!isset($callbacks[$path])) {
-          // Add a new item, possibly replacing (and thus effectively
-          // overriding) one that we removed above.
-          $callbacks[$path] = $item;
-        }
-        $our_paths[$path] = TRUE;
-      }
-    }
-    $view->destroy();
-  }
-}
-
-/**
- * Helper function for menu loading. This will automatically be
- * called in order to 'load' a views argument; primarily it
- * will be used to perform validation.
- *
- * @param $value
- *   The actual value passed.
- * @param $name
- *   The name of the view. This needs to be specified in the 'load function'
- *   of the menu entry.
- * @param $display_id
- *   The display id that will be loaded for this menu item.
- * @param $index
- *   The menu argument index. This counts from 1.
- */
-function views_arg_load($value, $name, $display_id, $index) {
-  static $views = array();
-
-  // Make sure we haven't already loaded this views argument for a similar menu
-  // item elsewhere.
-  $key = $name . ':' . $display_id . ':' . $value . ':' . $index;
-  if (isset($views[$key])) {
-    return $views[$key];
-  }
-
-  if ($view = views_get_view($name)) {
-    $view->setDisplay($display_id);
-    $view->initHandlers();
-
-    $ids = array_keys($view->argument);
-
-    $indexes = array();
-    $path = explode('/', $view->getPath());
-
-    foreach ($path as $id => $piece) {
-      if ($piece == '%' && !empty($ids)) {
-        $indexes[$id] = array_shift($ids);
-      }
-    }
-
-    if (isset($indexes[$index])) {
-      if (isset($view->argument[$indexes[$index]])) {
-        $arg = $view->argument[$indexes[$index]]->validateMenuArgument($value) ? $value : FALSE;
-        $view->destroy();
-
-        // Store the output in case we load this same menu item again.
-        $views[$key] = $arg;
-        return $arg;
-      }
-    }
-    $view->destroy();
-  }
-}
-
-/**
- * Page callback: Displays a page view, given a name and display id.
- *
- * @param $name
- *   The name of a view.
- * @param $display_id
- *   The display id of a view.
- *
- * @return
- *   Either the HTML of a fully-executed view, or MENU_NOT_FOUND.
- */
-function views_page($name, $display_id) {
-  $args = func_get_args();
-  // Remove $name and $display_id from the arguments.
-  array_shift($args);
-  array_shift($args);
-
-  // Load the view and render it.
-  if ($view = views_get_view($name)) {
-    if ($output = $view->executeDisplay($display_id, $args)) {
-      return $output;
-    }
-    else {
-      return array();
+    $result = $view->executeHookMenuLinkDefaults($display_id, $links);
+    foreach ($result as $link_id => $link) {
+      $links[$link_id] = $link;
     }
   }
-
-  // Fallback if we get here no view was found.
-  return MENU_NOT_FOUND;
 }
 
 /**
@@ -414,7 +302,7 @@ function views_page_alter(&$page) {
 /**
  * Implements MODULE_preprocess_HOOK().
  */
-function views_preprocess_html(&$variables) {
+function views_preprocess_page(&$variables) {
   // Early-return to prevent adding unnecessary JavaScript.
   if (!user_access('access contextual links')) {
     return;
@@ -432,11 +320,18 @@ function views_preprocess_html(&$variables) {
   // page.html.twig, so we can only find it using JavaScript. We therefore
   // remove the "contextual-region" class from the <body> tag here and add
   // JavaScript that will insert it back in the correct place.
-  if (!empty($variables['page']['#views_contextual_links'])) {
-    $key = array_search('contextual-region', $variables['attributes']['class']);
+  if (!empty($variables['page']['#views_contextual_links']) && isset($variables['attributes']['class'])) {
+    /** @var \Drupal\Core\Page\HtmlPage $page_object */
+    $page_object = $variables['page']['#page'];
+    $attributes = $page_object->getBodyAttributes();
+    $class = $attributes['class'] ?: array();
+
+    $key = array_search('contextual-region', $variables['attributes']['class'] instanceof AttributeArray ? $variables['attributes']['class']->value() : $variables['attributes']['class']);
     if ($key !== FALSE) {
-      unset($variables['attributes']['class'][$key]);
-      $variables['attributes']['data-views-page-contextual-id'] = $variables['title_suffix']['contextual_links']['#id'];
+      /** @var \Drupal\Core\Page\HtmlPage $page_object */
+      unset($class[$key]);
+      $attributes['class'] = $class;
+      $attributes['data-views-page-contextual-id'] = $variables['title_suffix']['contextual_links']['#id'];
       drupal_add_library('views', 'views.contextual-links');
     }
   }
@@ -594,27 +489,27 @@ function views_language_list($field = 'name', $flags = Language::STATE_ALL) {
 }
 
 /**
- * Implements hook_ENTITY_TYPE_create() for 'field_instance'.
+ * Implements hook_ENTITY_TYPE_create() for 'field_instance_config'.
  */
-function views_field_instance_create(FieldInstanceInterface $field_instance) {
-  cache('views_info')->deleteAll();
-  cache('views_results')->deleteAll();
+function views_field_instance_config_create(FieldInstanceConfigInterface $field_instance) {
+  \Drupal::cache('views_info')->deleteAll();
+  \Drupal::cache('views_results')->deleteAll();
 }
 
 /**
- * Implements hook_ENTITY_TYPE_update() for 'field_instance'.
+ * Implements hook_ENTITY_TYPE_update() for 'field_instance_config'.
  */
-function views_field_instance_update(FieldInstanceInterface $field_instance) {
-  cache('views_info')->deleteAll();
-  cache('views_results')->deleteAll();
+function views_field_instance_config_update(FieldInstanceConfigInterface $field_instance) {
+  \Drupal::cache('views_info')->deleteAll();
+  \Drupal::cache('views_results')->deleteAll();
 }
 
 /**
- * Implements hook_ENTITY_TYPE_delete() for 'field_instance'.
+ * Implements hook_ENTITY_TYPE_delete() for 'field_instance_config'.
  */
-function views_field_instance_delete(FieldInstanceInterface $field_instance) {
-  cache('views_info')->deleteAll();
-  cache('views_results')->deleteAll();
+function views_field_instance_config_delete(FieldInstanceConfigInterface $field_instance) {
+  \Drupal::cache('views_info')->deleteAll();
+  \Drupal::cache('views_results')->deleteAll();
 }
 
 /**
@@ -622,25 +517,18 @@ function views_field_instance_delete(FieldInstanceInterface $field_instance) {
  */
 function views_invalidate_cache() {
   // Clear the views cache.
-  cache('views_info')->deleteAll();
+  \Drupal::cache('views_info')->deleteAll();
 
   // Clear the page and block cache.
   Cache::deleteTags(array('content' => TRUE));
 
   // Set the menu as needed to be rebuilt.
-  \Drupal::state()->set('menu_rebuild_needed', TRUE);
+  \Drupal::service('router.builder')->setRebuildNeeded();
 
   $module_handler = \Drupal::moduleHandler();
 
   // Reset the RouteSubscriber from views.
   \Drupal::getContainer()->get('views.route_subscriber')->reset();
-
-  // Set the router to be rebuild.
-  // @todo Figure out why the cache rebuild is trigged but the route table
-  //   does not exist yet.
-  if (db_table_exists('router')) {
-    \Drupal::service('router.builder')->rebuild();
-  }
 
   // Invalidate the block cache to update views block derivatives.
   if ($module_handler->moduleExists('block')) {
@@ -742,57 +630,6 @@ function views_hook_info() {
 }
 
 /**
- * Implements hook_library_info().
- */
-function views_library_info() {
-  $path = drupal_get_path('module', 'views');
-  $libraries['views.module'] = array(
-    'title' => 'Views base',
-    'version' => \Drupal::VERSION,
-    'css' => array(
-      "$path/css/views.module.css"
-    ),
-  );
-  $libraries['views.ajax'] = array(
-    'title' => 'Views AJAX',
-    'version' => \Drupal::VERSION,
-    'js' => array(
-      "$path/js/base.js" => array('group' => JS_DEFAULT),
-      "$path/js/ajax_view.js" => array('group' => JS_DEFAULT),
-    ),
-    'dependencies' => array(
-      array('system', 'jquery'),
-      array('system', 'drupal'),
-      array('system', 'drupalSettings'),
-      array('system', 'jquery.once'),
-      array('system', 'jquery.form'),
-      array('system', 'drupal.ajax'),
-    ),
-  );
-  $libraries['views.contextual-links'] = array(
-    'title' => 'Views Contextual links',
-    'version' => \Drupal::VERSION,
-    'js' => array(
-      // Set to -10 to move it before the contextual links javascript file.
-      "$path/js/views-contextual.js" => array('group' => JS_LIBRARY, 'weight' => -10),
-    ),
-    'dependencies' => array(
-      array('system', 'jquery'),
-      array('system', 'drupal'),
-    ),
-  );
-  $libraries['views.exposed-form'] = array(
-    'title' => 'Views exposed form',
-    'version' => \Drupal::VERSION,
-    'css' => array(
-      "$path/css/views.exposed_form.css",
-    ),
-  );
-
-  return $libraries;
-}
-
-/**
  * Fetch a list of all base tables available
  *
  * @param $type
@@ -806,7 +643,8 @@ function views_library_info() {
  * @return
  *   A keyed array of in the form of 'base_table' => 'Description'.
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::fetchPluginNames().
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::fetchPluginNames().
  */
 function views_fetch_plugin_names($type, $key = NULL, $base = array()) {
   return Views::fetchPluginNames($type, $key, $base);
@@ -818,7 +656,8 @@ function views_fetch_plugin_names($type, $key = NULL, $base = array()) {
  * @return array
  *   An array of plugin definitions for all types.
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::getPluginDefinitions().
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::getPluginDefinitions().
  */
 function views_get_plugin_definitions() {
   return Views::getPluginDefinitions();
@@ -836,7 +675,8 @@ function views_get_plugin_definitions() {
  *   - views: An array of enabled Views that are currently using this plugin,
  *     keyed by machine name.
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::pluginList().
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::pluginList().
  */
 function views_plugin_list() {
   return Views::pluginList();
@@ -845,7 +685,8 @@ function views_plugin_list() {
 /**
  * Get enabled display extenders.
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::getEnabledDisplayExtenders().
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::getEnabledDisplayExtenders().
  */
 function views_get_enabled_display_extenders() {
   return Views::getEnabledDisplayExtenders();
@@ -867,7 +708,8 @@ function views_get_enabled_display_extenders() {
  * );
  * @endcode
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::getApplicableViews().
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::getApplicableViews().
  */
 function views_get_applicable_views($type) {
   return Views::getApplicableViews($type);
@@ -876,7 +718,8 @@ function views_get_applicable_views($type) {
 /**
  * Returns an array of all views as fully loaded $view objects.
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::getAllViews().
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::getAllViews().
  */
 function views_get_all_views() {
   return Views::getAllViews();
@@ -885,7 +728,8 @@ function views_get_all_views() {
 /**
  * Returns an array of all enabled views, as fully loaded $view objects.
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::getEnabledViews().
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::getEnabledViews().
  */
 function views_get_enabled_views() {
   return Views::getEnabledViews();
@@ -894,7 +738,8 @@ function views_get_enabled_views() {
 /**
  * Returns an array of all disabled views, as fully loaded $view objects.
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::getDisabledViews().
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::getDisabledViews().
  */
 function views_get_disabled_views() {
   return Views::getDisabledViews();
@@ -925,7 +770,8 @@ function views_get_disabled_views() {
  *  an associative array for use in select.
  *  - key: view name and display id separated by ':', or the view name only
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::getViewsAsOptions().
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::getViewsAsOptions().
  */
 function views_get_views_as_options($views_only = FALSE, $filter = 'all', $exclude_view = NULL, $optgroup = FALSE, $sort = FALSE) {
   return Views::getViewsAsOptions($views_only, $filter, $exclude_view, $optgroup, $sort);
@@ -986,31 +832,11 @@ function views_disable_view(View $view) {
  * @return \Drupal\views\ViewExecutable
  *   A reference to the $view object.
  *
- * @deprecated as of Drupal 8.0. Use \Drupal\views\Views::getView().
- *
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\views\Views::getView().
  */
 function views_get_view($name) {
   return Views::getView($name);
-}
-
-/**
- * Returns TRUE if the passed-in view contains handlers with views form
- * implementations, FALSE otherwise.
- */
-function views_view_has_form_elements($view) {
-  foreach ($view->field as $field) {
-    if (property_exists($field, 'views_form_callback') || method_exists($field, 'viewsForm')) {
-      return TRUE;
-    }
-  }
-  $area_handlers = array_merge(array_values($view->header), array_values($view->footer));
-  $empty = empty($view->result);
-  foreach ($area_handlers as $area) {
-    if (method_exists($area, 'viewsForm') && !$area->viewsFormEmpty($empty)) {
-      return TRUE;
-    }
-  }
-  return FALSE;
 }
 
 /**
@@ -1053,83 +879,6 @@ function views_pre_render_views_form_views_form($element) {
 }
 
 /**
- * Form builder for the exposed widgets form.
- *
- * Be sure that $display is a reference.
- */
-function views_exposed_form($form, &$form_state) {
-  // Don't show the form when batch operations are in progress.
-  if ($batch = batch_get() && isset($batch['current_set'])) {
-    return array(
-      // Set the theme callback to be nothing to avoid errors in template_preprocess_views_exposed_form().
-      '#theme' => '',
-    );
-  }
-
-  // Make sure that we validate because this form might be submitted
-  // multiple times per page.
-  $form_state['must_validate'] = TRUE;
-  $view = $form_state['view'];
-  $display = &$form_state['display'];
-
-  $form_state['input'] = $view->getExposedInput();
-
-  // Let form plugins know this is for exposed widgets.
-  $form_state['exposed'] = TRUE;
-  // Check if the form was already created
-  if ($cache = views_exposed_form_cache($view->storage->id(), $view->current_display)) {
-    return $cache;
-  }
-
-  $form['#info'] = array();
-
-  // Go through each handler and let it generate its exposed widget.
-  foreach ($view->display_handler->handlers as $type => $value) {
-    foreach ($view->$type as $id => $handler) {
-      if ($handler->canExpose() && $handler->isExposed()) {
-        // Grouped exposed filters have their own forms.
-        // Instead of render the standard exposed form, a new Select or
-        // Radio form field is rendered with the available groups.
-        // When an user choose an option the selected value is split
-        // into the operator and value that the item represents.
-        if ($handler->isAGroup()) {
-          $handler->groupForm($form, $form_state);
-          $id = $handler->options['group_info']['identifier'];
-        }
-        else {
-          $handler->buildExposedForm($form, $form_state);
-        }
-        if ($info = $handler->exposedInfo()) {
-          $form['#info']["$type-$id"] = $info;
-        }
-      }
-    }
-  }
-
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    // Prevent from showing up in \Drupal::request()->query.
-    '#name' => '',
-    '#type' => 'submit',
-    '#value' => t('Apply'),
-    '#id' => drupal_html_id('edit-submit-' . $view->storage->id()),
-  );
-
-  $form['#action'] = url($view->display_handler->getUrl());
-  $form['#theme'] = $view->buildThemeFunctions('views_exposed_form');
-  $form['#id'] = drupal_clean_css_identifier('views_exposed_form-' . check_plain($view->storage->id()) . '-' . check_plain($display['id']));
-//  $form['#attributes']['class'] = array('views-exposed-form');
-
-  $exposed_form_plugin = $form_state['exposed_form_plugin'];
-  $exposed_form_plugin->exposedFormAlter($form, $form_state);
-
-  // Save the form
-  views_exposed_form_cache($view->storage->id(), $view->current_display, $form);
-
-  return $form;
-}
-
-/**
  * Implement hook_form_alter for the exposed form.
  *
  * Since the exposed form is a GET form, we don't want it to send a wide
@@ -1139,71 +888,6 @@ function views_form_views_exposed_form_alter(&$form, &$form_state) {
   $form['form_build_id']['#access'] = FALSE;
   $form['form_token']['#access'] = FALSE;
   $form['form_id']['#access'] = FALSE;
-}
-
-/**
- * Validate handler for exposed filters
- */
-function views_exposed_form_validate(&$form, &$form_state) {
-  foreach (array('field', 'filter') as $type) {
-    $handlers = &$form_state['view']->$type;
-    foreach ($handlers as $key => $handler) {
-      $handlers[$key]->validateExposed($form, $form_state);
-    }
-  }
-  $exposed_form_plugin = $form_state['exposed_form_plugin'];
-  $exposed_form_plugin->exposedFormValidate($form, $form_state);
-}
-
-/**
- * Submit handler for exposed filters
- */
-function views_exposed_form_submit(&$form, &$form_state) {
-  foreach (array('field', 'filter') as $type) {
-    $handlers = &$form_state['view']->$type;
-    foreach ($handlers as $key => $info) {
-      $handlers[$key]->submitExposed($form, $form_state);
-    }
-  }
-  $form_state['view']->exposed_data = $form_state['values'];
-  $form_state['view']->exposed_raw_input = array();
-
-  $exclude = array('submit', 'form_build_id', 'form_id', 'form_token', 'exposed_form_plugin', '', 'reset');
-  $exposed_form_plugin = $form_state['exposed_form_plugin'];
-  $exposed_form_plugin->exposedFormSubmit($form, $form_state, $exclude);
-
-  foreach ($form_state['values'] as $key => $value) {
-    if (!in_array($key, $exclude)) {
-      $form_state['view']->exposed_raw_input[$key] = $value;
-    }
-  }
-}
-
-/**
- * Save the Views exposed form for later use.
- *
- * @param $views_name
- *   String. The views name.
- * @param $display_name
- *   String. The current view display name.
- * @param $form_output
- *   Array (optional). The form structure. Only needed when inserting the value.
- * @return
- *   Array. The form structure, if any. Otherwise, return FALSE.
- */
-function views_exposed_form_cache($views_name, $display_name, $form_output = NULL) {
-  // When running tests for exposed filters, this cache should
-  // be cleared between each test.
-  $views_exposed = &drupal_static(__FUNCTION__);
-
-  // Save the form output
-  if (!empty($form_output)) {
-    $views_exposed[$views_name][$display_name] = $form_output;
-    return;
-  }
-
-  // Return the form output, if any
-  return empty($views_exposed[$views_name][$display_name]) ? FALSE : $views_exposed[$views_name][$display_name];
 }
 
 /**
@@ -1279,10 +963,8 @@ function _views_query_tag_alter_condition(AlterableInterface $query, &$condition
  */
 function views_embed_view($name, $display_id = 'default') {
   $args = func_get_args();
-  array_shift($args); // remove $name
-  if (count($args)) {
-    array_shift($args); // remove $display_id
-  }
+  // Remove $name and $display_id from the arguments.
+  unset($args[0], $args[1]);
 
   $view = views_get_view($name);
   if (!$view || !$view->access($display_id)) {
@@ -1311,10 +993,8 @@ function views_embed_view($name, $display_id = 'default') {
  */
 function views_get_view_result($name, $display_id = NULL) {
   $args = func_get_args();
-  array_shift($args); // remove $name
-  if (count($args)) {
-    array_shift($args); // remove $display_id
-  }
+  // Remove $name and $display_id from the arguments.
+  unset($args[0], $args[1]);
 
   $view = views_get_view($name);
   if (is_object($view)) {
@@ -1337,7 +1017,7 @@ function views_get_view_result($name, $display_id = NULL) {
 }
 
 /**
- * #process callback to see if we need to check_plain() the options.
+ * #process callback to see if we need to String::checkPlain() the options.
  *
  * Since FAPI is inconsistent, the #options are sanitized for you in all cases
  * _except_ checkboxes. We have form elements that are sometimes 'select' and
@@ -1347,7 +1027,7 @@ function views_get_view_result($name, $display_id = NULL) {
  */
 function views_process_check_options($element, &$form_state) {
   if ($element['#type'] == 'checkboxes' || $element['#type'] == 'checkbox') {
-    $element['#options'] = array_map('check_plain', $element['#options']);
+    $element['#options'] = array_map('\Drupal\Component\Utility\String::checkPlain', $element['#options']);
   }
   return $element;
 }

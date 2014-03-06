@@ -8,9 +8,8 @@
 namespace Drupal\views\Plugin\views\filter;
 
 use Drupal\views\Plugin\views\HandlerBase;
-use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\String as UtilityString;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
-use Drupal\Component\Annotation\Plugin;
 use Drupal\views\ViewExecutable;
 
 /**
@@ -164,7 +163,7 @@ abstract class FilterPluginBase extends HandlerBase {
    * Display the filter on the administrative summary
    */
   public function adminSummary() {
-    return check_plain((string) $this->operator) . ' ' . check_plain((string) $this->value);
+    return UtilityString::checkPlain((string) $this->operator) . ' ' . UtilityString::checkPlain((string) $this->value);
   }
 
   /**
@@ -427,7 +426,7 @@ abstract class FilterPluginBase extends HandlerBase {
       $this->buildGroupOptions();
     }
 
-    $form_state['view']->getExecutable()->setItem($form_state['display_id'], $form_state['type'], $form_state['id'], $item);
+    $form_state['view']->getExecutable()->setHandler($form_state['display_id'], $form_state['type'], $form_state['id'], $item);
 
     $form_state['view']->addFormToStack($form_state['form_key'], $form_state['display_id'], $form_state['type'], $form_state['id'], TRUE, TRUE);
 
@@ -575,7 +574,7 @@ abstract class FilterPluginBase extends HandlerBase {
       '#default_value' => $this->options['expose']['remember'],
     );
 
-    $role_options = array_map('check_plain', user_role_names());
+    $role_options = array_map('\Drupal\Component\Utility\String::checkPlain', user_role_names());
     $form['expose']['remember_roles'] = array(
       '#type' => 'checkboxes',
       '#title' => t('User roles'),
@@ -666,7 +665,7 @@ abstract class FilterPluginBase extends HandlerBase {
    */
   protected function buildGroupSubmit($form, &$form_state) {
     $groups = array();
-    uasort($form_state['values']['options']['group_info']['group_items'], 'drupal_sort_weight');
+    uasort($form_state['values']['options']['group_info']['group_items'], array('Drupal\Component\Utility\SortArray', 'sortByWeightElement'));
     // Filter out removed items.
 
     // Start from 1 to avoid problems with #default_value in the widget.
@@ -746,7 +745,7 @@ abstract class FilterPluginBase extends HandlerBase {
       $value = $this->options['group_info']['identifier'];
 
       $form[$value] = array(
-        '#title' => String::checkPlain($this->options['group_info']['label']),
+        '#title' => UtilityString::checkPlain($this->options['group_info']['label']),
         '#type' => $this->options['group_info']['widget'],
         '#default_value' => $this->group_info,
         '#options' => $groups,
@@ -1090,7 +1089,7 @@ abstract class FilterPluginBase extends HandlerBase {
     // Add a new row.
     $item['group_info']['group_items'][] = array();
 
-    $form_state['view']->getExecutable()->setItem($form_state['display_id'], $form_state['type'], $form_state['id'], $item);
+    $form_state['view']->getExecutable()->setHandler($form_state['display_id'], $form_state['type'], $form_state['id'], $item);
 
     $form_state['view']->cacheSet();
     $form_state['rerender'] = TRUE;

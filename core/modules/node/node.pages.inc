@@ -9,101 +9,37 @@
  * @see node_menu()
  */
 
-use Drupal\Core\Entity\EntityInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Drupal\node\NodeInterface;
 
 /**
- * Page callback: Displays add content links for available content types.
+ * Prepares variables for list of available node type templates.
  *
- * Redirects to node/add/[type] if only one content type is available.
+ * Default template: node-add-list.html.twig.
  *
- * @return array
- *   A render array for a list of the node types that can be added; however, if
- *   there is only one node type defined for the site, the function redirects
- *   to the node add page for that one node type and does not return at all.
- *
- * @see node_menu()
- *
- * @deprecated Use \Drupal\node\Controller\NodeController::addPage()
- */
-function node_add_page() {
-  $content = array();
-  // Only use node types the user has access to.
-  $access_controller = Drupal::entityManager()->getAccessController('node');
-  foreach (node_type_get_types() as $type) {
-    if ($access_controller->createAccess($type->type)) {
-      $content[$type->type] = $type;
-    }
-  }
-  // Bypass the node/add listing if only one content type is available.
-  if (count($content) == 1) {
-    $type = array_shift($content);
-    return new RedirectResponse(url('node/add/' . $type->type, array('absolute' => TRUE)));
-  }
-  return array('#theme' => 'node_add_list', '#content' => $content);
-}
-
-/**
- * Returns HTML for a list of available node types for node creation.
- *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - content: An array of content types.
  *
  * @see node_add_page()
- *
- * @ingroup themeable
  */
-function theme_node_add_list($variables) {
-  $content = $variables['content'];
-
-  if ($content) {
-    $output = '<dl class="node-type-list">';
-    foreach ($content as $type) {
-      $output .= '<dt>' . l($type->name, 'node/add/' . $type->type) . '</dt>';
-      $output .= '<dd>' . filter_xss_admin($type->description) . '</dd>';
+function template_preprocess_node_add_list(&$variables) {
+  $variables['types'] = array();
+  if (!empty($variables['content'])) {
+    foreach ($variables['content'] as $type) {
+      $variables['types'][$type->type] = array(
+        'type' => $type->type,
+        'add_link' => l($type->name, 'node/add/' . $type->type),
+        'description' => filter_xss_admin($type->description),
+      );
     }
-    $output .= '</dl>';
   }
-  else {
-    $output = '<p>' . t('You have not created any content types yet. Go to the <a href="@create-content">content type creation page</a> to add a new content type.', array('@create-content' => url('admin/structure/types/add'))) . '</p>';
-  }
-  return $output;
-}
-
-
-/**
- * Page callback: Provides the node submission form.
- *
- * @param $node_type
- *   The node type object for the submitted node.
- *
- * @return array
- *   A node submission form.
- *
- * @see node_menu()
- *
- * @deprecated Use \Drupal\node\Controller\NodeController::add()
- */
-function node_add($node_type) {
-  $user = \Drupal::currentUser();
-
-  $type = $node_type->type;
-  $langcode = module_invoke('language', 'get_default_langcode', 'node', $type);
-  $node = entity_create('node', array(
-    'uid' => $user->id(),
-    'name' => $user->getUsername(),
-    'type' => $type,
-    'langcode' => $langcode ? $langcode : language_default()->id,
-  ));
-  return \Drupal::entityManager()->getForm($node);
 }
 
 /**
  * Generates a node preview.
  *
- * @param \Drupal\Core\Entity\EntityInterface $node
+ * @param \Drupal\node\NodeInterface $node
  *   The node to preview.
  *
  * @return
@@ -132,41 +68,37 @@ function node_preview(NodeInterface $node, array &$form_state) {
 }
 
 /**
- * Returns HTML for a node preview for display during node creation and editing.
+ * Prepares variables for node preview templates.
  *
- * @param $variables
+ * Default template: node-preview.html.twig.
+ *
+ * @param array $variables
  *   An associative array containing:
  *   - node: The node entity which is being previewed.
  *
  * @see NodeFormController::preview()
  * @see node_preview()
- *
- * @ingroup themeable
  */
-function theme_node_preview($variables) {
+function template_preprocess_node_preview(&$variables) {
   $node = $variables['node'];
 
-  $output = '';
+  // Render trimmed teaser version of the post.
+  $node_teaser = node_view($node, 'teaser');
+  $node_teaser['#attached']['library'][] = array('node', 'drupal.node.preview');
+  $variables['teaser'] = $node_teaser;
+  // Render full version of the post.
+  $node_full = node_view($node, 'full');
+  $variables['full'] = $node_full;
 
-  $elements = node_view($node, 'teaser');
-  $elements['#attached']['library'][] = array('node', 'drupal.node.preview');
-  $trimmed = drupal_render($elements);
-  $elements = node_view($node, 'full');
-  $full = drupal_render($elements);
-
-  // Do we need to preview trimmed version of post as well as full version?
-  if ($trimmed != $full) {
+  // Display a preview of the teaser only if the content of the teaser is
+  // different to the full post.
+  if ($variables['teaser'] != $variables['full']) {
     drupal_set_message(t('The trimmed version of your post shows what your post looks like when promoted to the main page or when exported for syndication.<span class="no-js"> You can insert the delimiter "&lt;!--break--&gt;" (without the quotes) to fine-tune where your post gets split.</span>'));
-    $output .= '<h3>' . t('Preview trimmed version') . '</h3>';
-    $output .= $trimmed;
-    $output .= '<h3>' . t('Preview full version') . '</h3>';
-    $output .= $full;
+    $variables['preview_teaser'] = TRUE;
   }
   else {
-    $output .= $full;
+    $variables['preview_teaser'] = FALSE;
   }
-
-  return $output;
 }
 
 /**
@@ -180,7 +112,8 @@ function theme_node_preview($variables) {
  *
  * @see node_menu()
  *
- * @deprecated Use \Drupal\node\Controller\NodeController::revisionOverview()
+ * @deprecated in Drupal 8.x-dev, will be removed before Drupal 8.0.
+ *   Use \Drupal\node\Controller\NodeController::revisionOverview().
  */
 function node_revision_overview($node) {
   $build['#title'] = t('Revisions for %title', array('%title' => $node->label()));

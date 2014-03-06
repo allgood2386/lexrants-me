@@ -8,8 +8,6 @@
 namespace Drupal\file\Plugin\views\wizard;
 
 use Drupal\views\Plugin\views\wizard\WizardPluginBase;
-use Drupal\views\Annotation\ViewsWizard;
-use Drupal\Core\Annotation\Translation;
 
 /**
  * Tests creating managed files views with the wizard.
@@ -25,7 +23,7 @@ class File extends WizardPluginBase {
   /**
    * Set the created column.
    */
-  protected $createdColumn = 'timestamp';
+  protected $createdColumn = 'created';
 
   /**
    * Set default values for the path field options.
@@ -46,6 +44,7 @@ class File extends WizardPluginBase {
 
     // Add permission-based access control.
     $display_options['access']['type'] = 'perm';
+    $display_options['access']['provider'] = 'user';
 
     // Remove the default fields, since we are customizing them here.
     unset($display_options['fields']);

@@ -8,7 +8,6 @@
 namespace Drupal\history\Plugin\views\filter;
 
 use Drupal\views\Plugin\views\filter\FilterPluginBase;
-use Drupal\Component\Annotation\PluginID;
 
 /**
  * Filter for new content.
@@ -81,7 +80,7 @@ class HistoryUserTimestamp extends FilterPluginBase {
 
     $clause = '';
     $clause2 = '';
-    if (module_exists('comment')) {
+    if (\Drupal::moduleHandler()->moduleExists('comment')) {
       $ces = $this->query->ensureTable('comment_entity_statistics', $this->relationship);
       $clause = ("OR $ces.last_comment_timestamp > (***CURRENT_TIME*** - $limit)");
       $clause2 = "OR $field < $ces.last_comment_timestamp";

@@ -15,7 +15,7 @@ interface ContentTranslationManagerInterface {
   /**
    * Gets the entity types that support content translation.
    *
-   * @return array
+   * @return \Drupal\Core\Entity\EntityTypeInterface[]
    *   An array of entity types that support content translation.
    */
   public function getSupportedEntityTypes();
@@ -23,12 +23,12 @@ interface ContentTranslationManagerInterface {
   /**
    * Checks whether an entity type supports translation.
    *
-   * @param string $entity_type
+   * @param string $entity_type_id
    *   The entity type.
    *
    * @return bool
    *   TRUE if an entity type is supported, FALSE otherwise.
    */
-  public function isSupported($entity_type);
+  public function isSupported($entity_type_id);
 
 }

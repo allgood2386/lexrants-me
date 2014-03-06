@@ -7,6 +7,7 @@
 
 namespace Drupal\user\Entity;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\user\RoleInterface;
@@ -14,7 +15,7 @@ use Drupal\user\RoleInterface;
 /**
  * Defines the user role entity class.
  *
- * @EntityType(
+ * @ConfigEntityType(
  *   id = "user_role",
  *   label = @Translation("Role"),
  *   controllers = {
@@ -27,15 +28,16 @@ use Drupal\user\RoleInterface;
  *     }
  *   },
  *   admin_permission = "administer permissions",
- *   config_prefix = "user.role",
+ *   config_prefix = "role",
  *   entity_keys = {
  *     "id" = "id",
- *     "uuid" = "uuid",
  *     "weight" = "weight",
  *     "label" = "label"
  *   },
  *   links = {
- *     "edit-form" = "user.role_edit"
+ *     "delete-form" = "user.role_delete",
+ *     "edit-form" = "user.role_edit",
+ *     "edit-permissions-form" = "user.admin_permission"
  *   }
  * )
  */
@@ -136,10 +138,23 @@ class Role extends ConfigEntityBase implements RoleInterface {
   /**
    * {@inheritdoc}
    */
+  public function postSave(EntityStorageControllerInterface $storage_controller, $update = TRUE) {
+    parent::postSave($storage_controller, $update);
+
+    Cache::invalidateTags(array('role' => $this->id()));
+    // Clear render cache.
+    entity_render_cache_clear();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function postDelete(EntityStorageControllerInterface $storage_controller, array $entities) {
     parent::postDelete($storage_controller, $entities);
 
-    $storage_controller->deleteRoleReferences(array_keys($entities));
+    $ids = array_keys($entities);
+    $storage_controller->deleteRoleReferences($ids);
+    Cache::invalidateTags(array('role' => $ids));
   }
 
 }

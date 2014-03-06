@@ -7,10 +7,8 @@
 
 namespace Drupal\Core\Config\Schema;
 
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\TypedData\ComplexDataInterface;
-use Drupal\Core\TypedData\TypedDataInterface;
-use \InvalidArgumentException;
+use Drupal\Component\Utility\String;
 
 /**
  * Defines a mapping configuration element.
@@ -27,7 +25,7 @@ class Mapping extends ArrayElement implements ComplexDataInterface {
   protected function parse() {
     $elements = array();
     foreach ($this->definition['mapping'] as $key => $definition) {
-      if (isset($this->value[$key])) {
+      if (isset($this->value[$key]) || array_key_exists($key, $this->value)) {
         $elements[$key] = $this->parseElement($key, $this->value[$key], $definition);
       }
     }
@@ -36,17 +34,29 @@ class Mapping extends ArrayElement implements ComplexDataInterface {
 
   /**
    * Implements Drupal\Core\TypedData\ComplexDataInterface::get().
+   *
+   * Since all configuration objects are mappings the function will except a dot
+   * delimited key to access nested values, for example, 'page.front'.
    */
   public function get($property_name) {
+    $parts = explode('.', $property_name);
+    $root_key = array_shift($parts);
     $elements = $this->getElements();
-    if (isset($elements[$property_name])) {
-      return $elements[$property_name];
+    if (isset($elements[$root_key])) {
+      $element = $elements[$root_key];
     }
     else {
-      throw new InvalidArgumentException(format_string("The configuration property @key doesn't exist.", array(
-          '@key' => $property_name,
-      )));
+      throw new SchemaIncompleteException(String::format("The configuration property @key doesn't exist.", array('@key' => $property_name)));
     }
+
+    // If $property_name contained a dot recurse into the keys.
+    foreach ($parts as $key) {
+     if (!is_object($element) || !method_exists($element, 'get')) {
+        throw new SchemaIncompleteException(String::format("The configuration property @key does not exist.", array('@key' => $property_name)));
+      }
+      $element = $element->get($key);
+    }
+    return $element;
   }
 
   /**
@@ -98,7 +108,13 @@ class Mapping extends ArrayElement implements ComplexDataInterface {
   }
 
   /**
-   * Implements Drupal\Core\TypedData\ComplexDataInterface::getPropertyDefinition().
+   * Gets the definition of a contained property.
+   *
+   * @param string $name
+   *   The name of property.
+   *
+   * @return array|FALSE
+   *   The definition of the property or FALSE if the property does not exist.
    */
   public function getPropertyDefinition($name) {
     if (isset($this->definition['mapping'][$name])) {
@@ -110,7 +126,11 @@ class Mapping extends ArrayElement implements ComplexDataInterface {
   }
 
   /**
-   * Implements Drupal\Core\TypedData\ComplexDataInterface::getPropertyDefinitions().
+   * Gets an array of property definitions of contained properties.
+   *
+   * @return \Drupal\Core\TypedData\DataDefinitionInterface[]
+   *   An array of property definitions of contained properties, keyed by
+   *   property name.
    */
   public function getPropertyDefinitions() {
     $list = array();

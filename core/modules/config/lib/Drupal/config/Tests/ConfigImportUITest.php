@@ -101,18 +101,35 @@ class ConfigImportUITest extends WebTestBase {
     $this->assertNoText(t('There are no configuration changes.'));
 
     // Acquire a fake-lock on the import mechanism.
-    $config_importer_lock = $this->configImporter()->getId();
-    $this->container->get('lock')->acquire($config_importer_lock);
+    $config_importer = $this->configImporter();
+    $this->container->get('lock')->acquire($config_importer::LOCK_ID);
 
     // Attempt to import configuration and verify that an error message appears.
     $this->drupalPostForm(NULL, array(), t('Import all'));
     $this->assertText(t('Another request may be synchronizing configuration already.'));
 
     // Release the lock, just to keep testing sane.
-    $this->container->get('lock')->release($config_importer_lock);
+    $this->container->get('lock')->release($config_importer::LOCK_ID);
 
     // Verify site name has not changed.
     $this->assertNotEqual($new_site_name, \Drupal::config('system.site')->get('name'));
+  }
+
+  /**
+   * Tests verification of site UUID before importing configuration.
+   */
+  function testImportSiteUuidValidation() {
+    $staging = \Drupal::service('config.storage.staging');
+    // Create updated configuration object.
+    $config_data = \Drupal::config('system.site')->get();
+    // Generate a new site UUID.
+    $config_data['uuid'] = \Drupal::service('uuid')->generate();
+    $staging->write('system.site', $config_data);
+
+    // Verify that there are configuration differences to import.
+    $this->drupalGet('admin/config/development/configuration');
+    $this->assertText(t('The staged configuration cannot be imported, because it originates from a different site than this site. You can only synchronize configuration between cloned instances of this site.'));
+    $this->assertNoFieldById('edit-submit', t('Import all'));
   }
 
   /**

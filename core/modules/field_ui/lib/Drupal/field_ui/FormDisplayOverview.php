@@ -7,9 +7,13 @@
 
 namespace Drupal\field_ui;
 
-use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Plugin\PluginManagerBase;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\Display\EntityDisplayInterface;
-use Drupal\field\FieldInstanceInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldTypePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -20,11 +24,44 @@ class FormDisplayOverview extends DisplayOverviewBase {
   /**
    * {@inheritdoc}
    */
+  protected $displayContext = 'form';
+
+  /**
+   * Stores the module manager.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * Constructs a new class instance.
+   *
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param \Drupal\Core\Field\FieldTypePluginManager $field_type_manager
+   *   The field type manager.
+   * @param \Drupal\Component\Plugin\PluginManagerBase $plugin_manager
+   *   The widget or formatter plugin manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler to use for invoking hooks.
+   * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   *   The configuration factory.
+   */
+  public function __construct(EntityManagerInterface $entity_manager, FieldTypePluginManager $field_type_manager, PluginManagerBase $plugin_manager, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config_factory) {
+    parent::__construct($entity_manager, $field_type_manager, $plugin_manager, $config_factory);
+    $this->moduleHandler = $module_handler;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity.manager'),
       $container->get('plugin.manager.field.field_type'),
-      $container->get('plugin.manager.field.widget')
+      $container->get('plugin.manager.field.widget'),
+      $container->get('module_handler'),
+      $container->get('config.factory')
     );
   }
 
@@ -38,23 +75,25 @@ class FormDisplayOverview extends DisplayOverviewBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, $entity_type = NULL, $bundle = NULL) {
+  public function buildForm(array $form, array &$form_state, $entity_type_id = NULL, $bundle = NULL) {
     if ($this->getRequest()->attributes->has('form_mode_name')) {
       $this->mode = $this->getRequest()->attributes->get('form_mode_name');
     }
 
-    return parent::buildForm($form, $form_state, $entity_type, $bundle);
+    return parent::buildForm($form, $form_state, $entity_type_id, $bundle);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function buildFieldRow($field_id, FieldInstanceInterface $instance, EntityDisplayInterface $entity_display, array $form, array &$form_state) {
-    $field_row = parent::buildFieldRow($field_id, $instance, $entity_display, $form, $form_state);
+  protected function buildFieldRow(FieldDefinitionInterface $field_definition, EntityDisplayInterface $entity_display, array $form, array &$form_state) {
+    $field_row = parent::buildFieldRow($field_definition, $entity_display, $form, $form_state);
+
+    $field_name = $field_definition->getName();
 
     // Update the (invisible) title of the 'plugin' column.
-    $field_row['plugin']['#title'] = $this->t('Formatter for @title', array('@title' => $instance->getLabel()));
-    if (!empty($field_row['plugin']['settings_edit_form']) && ($plugin = $entity_display->getRenderer($field_id))) {
+    $field_row['plugin']['#title'] = $this->t('Formatter for @title', array('@title' => $field_definition->getLabel()));
+    if (!empty($field_row['plugin']['settings_edit_form']) && ($plugin = $entity_display->getRenderer($field_name))) {
       $plugin_type_info = $plugin->getPluginDefinition();
       $field_row['plugin']['settings_edit_form']['label']['#markup'] = $this->t('Widget settings:') . ' <span class="plugin-name">' . $plugin_type_info['label'] . '</span>';
     }
@@ -72,19 +111,12 @@ class FormDisplayOverview extends DisplayOverviewBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExtraFields() {
-    return field_info_extra_fields($this->entity_type, $this->bundle, 'form');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getPlugin($instance, $configuration) {
+  protected function getPlugin(FieldDefinitionInterface $field_definition, $configuration) {
     $plugin = NULL;
 
     if ($configuration && $configuration['type'] != 'hidden') {
       $plugin = $this->pluginManager->getInstance(array(
-        'field_definition' => $instance,
+        'field_definition' => $field_definition,
         'form_mode' => $this->mode,
         'configuration' => $configuration
       ));
@@ -122,7 +154,7 @@ class FormDisplayOverview extends DisplayOverviewBase {
   }
 
   /**
-   * {@inheritdoc
+   * {@inheritdoc}
    */
   protected function getTableHeader() {
     return array(
@@ -136,35 +168,40 @@ class FormDisplayOverview extends DisplayOverviewBase {
   /**
    * {@inheritdoc}
    */
-  protected function getOverviewPath($mode) {
-    return $this->entityManager->getAdminPath($this->entity_type, $this->bundle) . "/form-display/$mode";
+  protected function getOverviewRoute($mode) {
+    return array(
+      'route_name' => 'field_ui.form_display_overview_form_mode_' . $this->entity_type,
+      'route_parameters' => array(
+        $this->bundleEntityType => $this->bundle,
+        'form_mode_name' => $mode,
+      ),
+      'options' => array(),
+    );
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function alterSettingsForm(array &$settings_form, $plugin, FieldInstanceInterface $instance, array $form, array &$form_state) {
+  protected function alterSettingsForm(array &$settings_form, $plugin, FieldDefinitionInterface $field_definition, array $form, array &$form_state) {
     $context = array(
       'widget' => $plugin,
-      'field' => $instance->getField(),
-      'instance' => $instance,
+      'field_definition' => $field_definition,
       'form_mode' => $this->mode,
       'form' => $form,
     );
-    drupal_alter('field_widget_settings_form', $settings_form, $form_state, $context);
+    $this->moduleHandler->alter('field_widget_settings_form', $settings_form, $form_state, $context);
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function alterSettingsSummary(array &$summary, $plugin, FieldInstanceInterface $instance) {
+  protected function alterSettingsSummary(array &$summary, $plugin, FieldDefinitionInterface $field_definition) {
     $context = array(
       'widget' => $plugin,
-      'field' => $instance->getField(),
-      'instance' => $instance,
+      'field_definition' => $field_definition,
       'form_mode' => $this->mode,
     );
-    drupal_alter('field_widget_settings_summary', $summary, $context);
+    $this->moduleHandler->alter('field_widget_settings_summary', $summary, $context);
   }
 
 }

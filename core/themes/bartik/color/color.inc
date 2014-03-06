@@ -6,7 +6,9 @@
  */
 
 // Put the logo path into JavaScript for the live preview.
-drupal_add_js(array('color' => array('logo' => theme_get_setting('logo.url', 'bartik'))), 'setting');
+$js = array('color' => array('logo' => theme_get_setting('logo.url', 'bartik')));
+$js_attached['#attached']['js'][] = array('data' => $js, 'type' => 'setting');
+drupal_render($js_attached);
 
 $info = array(
   // Available colors and color labels used in theme.
@@ -117,21 +119,8 @@ $info = array(
     ),
   ),
 
-  // Color areas to fill (x, y, width, height).
-  'fill' => array(),
-
-  // Coordinates of all the theme slices (x, y, width, height)
-  // with their filename as used in the stylesheet.
-  'slices' => array(),
-
-  // Reference color used for blending. Matches the base.png's colors.
-  'blend_target' => '#ffffff',
-
   // Preview files.
   'preview_css' => 'color/preview.css',
   'preview_js' => 'color/preview.js',
   'preview_html' => 'color/preview.html',
-
-  // Base file for image generation.
-  'base_image' => 'color/base.png',
 );

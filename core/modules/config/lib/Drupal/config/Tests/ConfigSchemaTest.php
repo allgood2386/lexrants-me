@@ -7,7 +7,6 @@
 
 namespace Drupal\config\Tests;
 
-use Drupal\Core\Config\TypedConfig;
 use Drupal\Core\TypedData\Type\IntegerInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
 use Drupal\simpletest\DrupalUnitTestBase;
@@ -34,9 +33,7 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
 
   public function setUp() {
     parent::setUp();
-    config_install_default_config('module', 'system');
-    config_install_default_config('module', 'image');
-    config_install_default_config('module', 'config_test');
+    $this->installConfig(array('system', 'image', 'config_test'));
   }
 
   /**
@@ -44,21 +41,21 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
    */
   function testSchemaMapping() {
     // Nonexistent configuration key will have Unknown as metadata.
-    $this->assertIdentical(FALSE, config_typed()->hasConfigSchema('config_test.no_such_key'));
-    $definition = config_typed()->getDefinition('config_test.no_such_key');
+    $this->assertIdentical(FALSE, \Drupal::service('config.typed')->hasConfigSchema('config_test.no_such_key'));
+    $definition = \Drupal::service('config.typed')->getDefinition('config_test.no_such_key');
     $expected = array();
     $expected['label'] = 'Unknown';
     $expected['class'] = '\Drupal\Core\Config\Schema\Property';
     $this->assertEqual($definition, $expected, 'Retrieved the right metadata for nonexistent configuration.');
 
     // Configuration file without schema will return Unknown as well.
-    $this->assertIdentical(FALSE, config_typed()->hasConfigSchema('config_test.noschema'));
-    $definition = config_typed()->getDefinition('config_test.noschema');
+    $this->assertIdentical(FALSE, \Drupal::service('config.typed')->hasConfigSchema('config_test.noschema'));
+    $definition = \Drupal::service('config.typed')->getDefinition('config_test.noschema');
     $this->assertEqual($definition, $expected, 'Retrieved the right metadata for configuration with no schema.');
 
     // Configuration file with only some schema.
-    $this->assertIdentical(TRUE, config_typed()->hasConfigSchema('config_test.someschema'));
-    $definition = config_typed()->getDefinition('config_test.someschema');
+    $this->assertIdentical(TRUE, \Drupal::service('config.typed')->hasConfigSchema('config_test.someschema'));
+    $definition = \Drupal::service('config.typed')->getDefinition('config_test.someschema');
     $expected = array();
     $expected['label'] = 'Schema test data';
     $expected['class'] = '\Drupal\Core\Config\Schema\Mapping';
@@ -67,14 +64,14 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
     $this->assertEqual($definition, $expected, 'Retrieved the right metadata for configuration with only some schema.');
 
     // Check type detection on elements with undefined types.
-    $config = config_typed()->get('config_test.someschema');
-    $definition = $config['testitem']->getDefinition();
+    $config = \Drupal::service('config.typed')->get('config_test.someschema');
+    $definition = $config['testitem']->getDataDefinition();
     $expected = array();
     $expected['label'] = 'Test item';
     $expected['class'] = '\Drupal\Core\TypedData\Plugin\DataType\String';
     $expected['type'] = 'string';
     $this->assertEqual($definition, $expected, 'Automatic type detection on string item worked.');
-    $definition = $config['testlist']->getDefinition();
+    $definition = $config['testlist']->getDataDefinition();
     $expected = array();
     $expected['label'] = 'Test list';
     $expected['class'] = '\Drupal\Core\Config\Schema\Property';
@@ -82,7 +79,7 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
     $this->assertEqual($definition, $expected, 'Automatic type fallback on non-string item worked.');
 
     // Simple case, straight metadata.
-    $definition = config_typed()->getDefinition('system.maintenance');
+    $definition = \Drupal::service('config.typed')->getDefinition('system.maintenance');
     $expected = array();
     $expected['label'] = 'Maintenance mode';
     $expected['class'] = '\Drupal\Core\Config\Schema\Mapping';
@@ -97,11 +94,13 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
     $this->assertEqual($definition, $expected, 'Retrieved the right metadata for system.maintenance');
 
     // More complex case, generic type. Metadata for image style.
-    $definition = config_typed()->getDefinition('image.style.large');
+    $definition = \Drupal::service('config.typed')->getDefinition('image.style.large');
     $expected = array();
     $expected['label'] = 'Image style';
     $expected['class'] = '\Drupal\Core\Config\Schema\Mapping';
     $expected['mapping']['name']['type'] = 'string';
+    $expected['mapping']['uuid']['label'] = 'UUID';
+    $expected['mapping']['uuid']['type'] = 'string';
     $expected['mapping']['label']['type'] = 'label';
     $expected['mapping']['effects']['type'] = 'sequence';
     $expected['mapping']['effects']['sequence'][0]['type'] = 'mapping';
@@ -111,11 +110,13 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
     $expected['mapping']['effects']['sequence'][0]['mapping']['uuid']['type'] = 'string';
     $expected['mapping']['langcode']['label'] = 'Default language';
     $expected['mapping']['langcode']['type'] = 'string';
+    $expected['mapping']['status']['label'] = 'Enabled';
+    $expected['mapping']['status']['type'] = 'boolean';
 
     $this->assertEqual($definition, $expected, 'Retrieved the right metadata for image.style.large');
 
     // More complex, type based on a complex one.
-    $definition = config_typed()->getDefinition('image.effect.image_scale');
+    $definition = \Drupal::service('config.typed')->getDefinition('image.effect.image_scale');
     // This should be the schema for image.effect.image_scale.
     $expected = array();
     $expected['label'] = 'Image scale';
@@ -130,27 +131,27 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
     $this->assertEqual($definition, $expected, 'Retrieved the right metadata for image.effect.image_scale');
 
     // Most complex case, get metadata for actual configuration element.
-    $effects = config_typed()->get('image.style.medium')->get('effects');
-    $definition = $effects['bddf0d06-42f9-4c75-a700-a33cafa25ea0']['data']->getDefinition();
+    $effects = \Drupal::service('config.typed')->get('image.style.medium')->get('effects');
+    $definition = $effects['bddf0d06-42f9-4c75-a700-a33cafa25ea0']['data']->getDataDefinition();
     // This should be the schema for image.effect.image_scale, reuse previous one.
     $expected['type'] =  'image.effect.image_scale';
 
     $this->assertEqual($definition, $expected, 'Retrieved the right metadata for the first effect of image.style.medium');
 
     // More complex, multiple filesystem marker test.
-    $definition = config_typed()->getDefinition('config_test.someschema.somemodule.section_one.subsection');
+    $definition = \Drupal::service('config.typed')->getDefinition('config_test.someschema.somemodule.section_one.subsection');
     // This should be the schema of config_test.someschema.somemodule.*.*.
     $expected = array();
     $expected['label'] = 'Schema multiple filesytem marker test';
     $expected['class'] = '\Drupal\Core\Config\Schema\Mapping';
-    $expected['mapping']['id']['type'] = 'string';
-    $expected['mapping']['id']['label'] = 'ID';
-    $expected['mapping']['description']['type'] = 'text';
-    $expected['mapping']['description']['label'] = 'Description';
+    $expected['mapping']['testid']['type'] = 'string';
+    $expected['mapping']['testid']['label'] = 'ID';
+    $expected['mapping']['testdescription']['type'] = 'text';
+    $expected['mapping']['testdescription']['label'] = 'Description';
 
     $this->assertEqual($definition, $expected, 'Retrieved the right metadata for config_test.someschema.somemodule.section_one.subsection');
 
-    $definition = config_typed()->getDefinition('config_test.someschema.somemodule.section_two.subsection');
+    $definition = \Drupal::service('config.typed')->getDefinition('config_test.someschema.somemodule.section_two.subsection');
     // The other file should have the same schema.
     $this->assertEqual($definition, $expected, 'Retrieved the right metadata for config_test.someschema.somemodule.section_two.subsection');
   }
@@ -159,11 +160,11 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
    * Tests metadata retrieval with several levels of %parent indirection.
    */
   function testSchemaMappingWithParents() {
-    $config_data = config_typed()->get('config_test.someschema.with_parents');
+    $config_data = \Drupal::service('config.typed')->get('config_test.someschema.with_parents');
 
     // Test fetching parent one level up.
     $entry = $config_data->get('one_level');
-    $definition = $entry['testitem']->getDefinition();
+    $definition = $entry['testitem']->getDataDefinition();
     $expected = array(
       'type' => 'config_test.someschema.with_parents.key_1',
       'label' => 'Test item nested one level',
@@ -173,7 +174,7 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
 
     // Test fetching parent two levels up.
     $entry = $config_data->get('two_levels');
-    $definition = $entry['wrapper']['testitem']->getDefinition();
+    $definition = $entry['wrapper']['testitem']->getDataDefinition();
     $expected = array(
       'type' => 'config_test.someschema.with_parents.key_2',
       'label' => 'Test item nested two levels',
@@ -183,7 +184,7 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
 
     // Test fetching parent three levels up.
     $entry = $config_data->get('three_levels');
-    $definition = $entry['wrapper_1']['wrapper_2']['testitem']->getDefinition();
+    $definition = $entry['wrapper_1']['wrapper_2']['testitem']->getDataDefinition();
     $expected = array(
       'type' => 'config_test.someschema.with_parents.key_3',
       'label' => 'Test item nested three levels',
@@ -197,17 +198,17 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
    */
   function testSchemaData() {
     // Try some simple properties.
-    $meta = config_typed()->get('system.site');
+    $meta = \Drupal::service('config.typed')->get('system.site');
     $property = $meta->get('name');
     $this->assertTrue($property instanceof StringInterface, 'Got the right wrapper fo the site name property.');
     $this->assertEqual($property->getValue(), 'Drupal', 'Got the right string value for site name data.');
-    $definition = $property->getDefinition();
+    $definition = $property->getDataDefinition();
     $this->assertTrue($definition['translatable'], 'Got the right translatability setting for site name data.');
 
     $property = $meta->get('page')->get('front');
     $this->assertTrue($property instanceof StringInterface, 'Got the right wrapper fo the page.front property.');
     $this->assertEqual($property->getValue(), 'user', 'Got the right value for page.front data.');
-    $definition = $property->getDefinition();
+    $definition = $property->getDataDefinition();
     $this->assertTrue(empty($definition['translatable']), 'Got the right translatability setting for page.front data.');
 
     // Check nested array of properties.
@@ -223,7 +224,7 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
     $this->assertTrue(count($values) == 3 && $values['front'] == 'user', 'Got the right property values for site page.');
 
     // Now let's try something more complex, with nested objects.
-    $wrapper = config_typed()->get('image.style.large');
+    $wrapper = \Drupal::service('config.typed')->get('image.style.large');
     $effects = $wrapper->get('effects');
 
     // The function is_array() doesn't work with ArrayAccess, so we use count().
@@ -236,10 +237,69 @@ class ConfigSchemaTest extends DrupalUnitTestBase {
 
     // Finally update some object using a configuration wrapper.
     $new_slogan = 'Site slogan for testing configuration metadata';
-    $wrapper = config_typed()->get('system.site');
+    $wrapper = \Drupal::service('config.typed')->get('system.site');
     $wrapper->set('slogan', $new_slogan);
     $site_slogan = $wrapper->get('slogan');
     $this->assertEqual($site_slogan->getValue(), $new_slogan, 'Successfully updated the contained configuration data');
+  }
+
+  /**
+   * Test configuration value data type enforcement using schemas.
+   */
+  public function testConfigSaveWithSchema() {
+    $untyped_values = array(
+      'string' => 1,
+      'empty_string' => '',
+      'null_string' => NULL,
+      'integer' => '100',
+      'null_integer' => '',
+      'boolean' => 1,
+      // If the config schema doesn't have a type it should be casted to string.
+      'no_type' => 1,
+      'mapping' => array(
+        'string' => 1
+      ),
+      'float' => '3.14',
+      'null_float' => '',
+      'sequence' => array (1, 0, 1),
+      // Not in schema and therefore should be left untouched.
+      'not_present_in_schema' => TRUE,
+      // Test a custom type.
+      'config_test_integer' => '1',
+      'config_test_integer_empty_string' => '',
+    );
+    $untyped_to_typed = $untyped_values;
+
+    $typed_values = array(
+      'string' => '1',
+      'empty_string' => '',
+      'null_string' => NULL,
+      'integer' => 100,
+      'null_integer' => NULL,
+      'boolean' => TRUE,
+      'no_type' => '1',
+      'mapping' => array(
+        'string' => '1'
+      ),
+      'float' => 3.14,
+      'null_float' => NULL,
+      'sequence' => array (TRUE, FALSE, TRUE),
+      'not_present_in_schema' => TRUE,
+      'config_test_integer' => 1,
+      'config_test_integer_empty_string' => NULL,
+    );
+
+    // Save config which has a schema that enforces types.
+    \Drupal::config('config_test.schema_data_types')
+      ->setData($untyped_to_typed)
+      ->save();
+    $this->assertIdentical(\Drupal::config('config_test.schema_data_types')->get(), $typed_values);
+
+    // Save config which does not have a schema that enforces types.
+    \Drupal::config('config_test.no_schema_data_types')
+      ->setData($untyped_values)
+      ->save();
+    $this->assertIdentical(\Drupal::config('config_test.no_schema_data_types')->get(), $untyped_values);
   }
 
 }

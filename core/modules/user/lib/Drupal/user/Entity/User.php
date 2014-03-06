@@ -10,13 +10,14 @@ namespace Drupal\user\Entity;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityStorageControllerInterface;
 use Drupal\Core\Entity\EntityMalformedException;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\user\UserInterface;
 
 /**
  * Defines the user entity class.
  *
- * @EntityType(
+ * @ContentEntityType(
  *   id = "user",
  *   label = @Translation("User"),
  *   controllers = {
@@ -44,7 +45,8 @@ use Drupal\user\UserInterface;
  *   links = {
  *     "canonical" = "user.view",
  *     "edit-form" = "user.edit",
- *     "admin-form" = "user.account_settings"
+ *     "admin-form" = "user.account_settings",
+ *     "cancel-form" = "user.cancel"
  *   }
  * )
  */
@@ -269,13 +271,6 @@ class User extends ContentEntityBase implements UserInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultTheme() {
-    return $this->get('theme')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getSignature() {
     return $this->get('signature')->value;
   }
@@ -429,7 +424,7 @@ class User extends ContentEntityBase implements UserInterface {
   /**
    * {@inheritdoc}
    */
-  public static function baseFieldDefinitions($entity_type) {
+  public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields['uid'] = FieldDefinition::create('integer')
       ->setLabel(t('User ID'))
       ->setDescription(t('The user ID.'))
@@ -452,6 +447,8 @@ class User extends ContentEntityBase implements UserInterface {
       ->setLabel(t('Preferred language code'))
       ->setDescription(t("The user's preferred language code for viewing administration pages."));
 
+    // The name should not vary per language. The username is the visual
+    // identifier for a user and needs to be consistent in all languages.
     $fields['name'] = FieldDefinition::create('string')
       ->setLabel(t('Name'))
       ->setDescription(t('The name of this user.'))
@@ -476,21 +473,15 @@ class User extends ContentEntityBase implements UserInterface {
     // @todo Convert to a text field in https://drupal.org/node/1548204.
     $fields['signature'] = FieldDefinition::create('string')
       ->setLabel(t('Signature'))
-      ->setDescription(t('The signature of this user.'))
-      ->setPropertyConstraints('value', array('Length' => array('max' => 255)));
+      ->setDescription(t('The signature of this user.'));
     $fields['signature_format'] = FieldDefinition::create('string')
       ->setLabel(t('Signature format'))
       ->setDescription(t('The signature format of this user.'));
 
-    $fields['theme'] = FieldDefinition::create('string')
-      ->setLabel(t('Theme'))
-      ->setDescription(t('The default theme of this user.'))
-      ->setPropertyConstraints('value', array('Length' => array('max' => DRUPAL_EXTENSION_NAME_MAX_LENGTH)));
-
     $fields['timezone'] = FieldDefinition::create('string')
       ->setLabel(t('Timezone'))
       ->setDescription(t('The timezone of this user.'))
-      ->setPropertyConstraints('value', array('Length' => array('max' => 32)));
+      ->setSetting('max_length', 32);
 
     $fields['status'] = FieldDefinition::create('boolean')
       ->setLabel(t('User status'))

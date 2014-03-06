@@ -8,8 +8,6 @@
 namespace Drupal\ckeditor\Plugin\CKEditorPlugin;
 
 use Drupal\ckeditor\CKEditorPluginBase;
-use Drupal\ckeditor\Annotation\CKEditorPlugin;
-use Drupal\Core\Annotation\Translation;
 use Drupal\editor\Entity\Editor;
 
 /**
@@ -35,7 +33,7 @@ class DrupalLink extends CKEditorPluginBase {
    */
   public function getLibraries(Editor $editor) {
     return array(
-      array('system', 'drupal.ajax'),
+      array('core', 'drupal.ajax'),
     );
   }
 

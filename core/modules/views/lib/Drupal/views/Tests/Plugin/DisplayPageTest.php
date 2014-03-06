@@ -7,12 +7,9 @@
 
 namespace Drupal\views\Tests\Plugin;
 
-use Drupal\Core\Routing\RouteBuildEvent;
-use Drupal\views\EventSubscriber\RouteSubscriber;
 use Drupal\views\Tests\ViewUnitTestBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\Routing\RouteCollection;
 
 /**
  * Tests the page display plugin.
@@ -33,7 +30,7 @@ class DisplayPageTest extends ViewUnitTestBase {
    *
    * @var array
    */
-  public static $modules = array('system', 'user', 'menu_link', 'field');
+  public static $modules = array('system', 'user', 'menu_link', 'field', 'entity');
 
   /**
    * The router dumper to get all routes.
@@ -57,18 +54,14 @@ class DisplayPageTest extends ViewUnitTestBase {
     parent::setUp();
 
     // Setup the needed tables in order to make the drupal router working.
-    $this->installSchema('system', array('router', 'menu_router', 'url_alias'));
+    $this->installSchema('system', array('url_alias'));
     $this->installSchema('menu_link', 'menu_links');
-    $this->installSchema('user', 'users');
   }
 
   /**
-   * Checks the behavior of the page for access denied/not found behaviours.
+   * Checks the behavior of the page for access denied/not found behaviors.
    */
   public function testPageResponses() {
-    // @todo Importing a route should fire a container rebuild.
-    $this->container->get('router.builder')->rebuild();
-
     $subrequest = Request::create('/test_page_display_403', 'GET');
     $response = $this->container->get('http_kernel')->handle($subrequest, HttpKernelInterface::SUB_REQUEST);
     $this->assertEqual($response->getStatusCode(), 403);
@@ -88,6 +81,9 @@ class DisplayPageTest extends ViewUnitTestBase {
     $view = views_get_view('test_page_display');
     // Disable the view, rebuild menu, and request the page again.
     $view->storage->disable()->save();
+    // Router rebuild would occur in a kernel terminate event so we need to
+    // simulate that here.
+    \Drupal::service('router.builder')->rebuildIfNeeded();
 
     $response = $this->container->get('http_kernel')->handle($subrequest, HttpKernelInterface::SUB_REQUEST);
     $this->assertEqual($response->getStatusCode(), 404);
@@ -113,27 +109,27 @@ class DisplayPageTest extends ViewUnitTestBase {
     $this->assertEqual($route->getPath(), '/test_route_without_arguments');
 
     $route = $collection->get('view.test_page_display_route.page_2');
-    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_id}');
-    $this->assertTrue($route->hasDefault('arg_id'), 'A default value is set for the optional argument id.');
+    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_0}');
+    $this->assertTrue($route->hasDefault('arg_0'), 'A default value is set for the optional argument id.');
 
     $route = $collection->get('view.test_page_display_route.page_3');
-    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_id}/suffix');
-    $this->assertFalse($route->hasDefault('arg_id'), 'No default value is set for the required argument id.');
+    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_0}/suffix');
+    $this->assertFalse($route->hasDefault('arg_0'), 'No default value is set for the required argument id.');
 
     $route = $collection->get('view.test_page_display_route.page_4');
-    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_id}/suffix/{arg_id_2}');
-    $this->assertFalse($route->hasDefault('arg_id'), 'No default value is set for the required argument id.');
-    $this->assertTrue($route->hasDefault('arg_id_2'), 'A default value is set for the optional argument id_2.');
+    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_0}/suffix/{arg_1}');
+    $this->assertFalse($route->hasDefault('arg_0'), 'No default value is set for the required argument id.');
+    $this->assertTrue($route->hasDefault('arg_1'), 'A default value is set for the optional argument id_2.');
 
     $route = $collection->get('view.test_page_display_route.page_5');
-    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_id}/{arg_id_2}');
-    $this->assertTrue($route->hasDefault('arg_id'), 'A default value is set for the optional argument id.');
-    $this->assertTrue($route->hasDefault('arg_id_2'), 'A default value is set for the optional argument id_2.');
+    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_0}/{arg_1}');
+    $this->assertTrue($route->hasDefault('arg_0'), 'A default value is set for the optional argument id.');
+    $this->assertTrue($route->hasDefault('arg_1'), 'A default value is set for the optional argument id_2.');
 
     $route = $collection->get('view.test_page_display_route.page_6');
-    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_id}/{arg_id_2}');
-    $this->assertFalse($route->hasDefault('arg_id'), 'No default value is set for the required argument id.');
-    $this->assertFalse($route->hasDefault('arg_id_2'), 'No default value is set for the required argument id_2.');
+    $this->assertEqual($route->getPath(), '/test_route_with_argument/{arg_0}/{arg_1}');
+    $this->assertFalse($route->hasDefault('arg_0'), 'No default value is set for the required argument id.');
+    $this->assertFalse($route->hasDefault('arg_1'), 'No default value is set for the required argument id_2.');
   }
 
 }

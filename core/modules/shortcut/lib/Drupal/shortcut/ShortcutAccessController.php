@@ -10,6 +10,7 @@ namespace Drupal\shortcut;
 use Drupal\Core\Entity\EntityAccessController;
 use Drupal\Core\Entity\EntityControllerInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -28,25 +29,22 @@ class ShortcutAccessController extends EntityAccessController implements EntityC
   /**
    * Constructs a ShortcutAccessController object.
    *
-   * @param string $entity_type
-   *   The entity type of the access controller instance.
-   * @param array $entity_info
-   *   An array of entity info for the entity type.
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   The entity type definition.
    * @param \Drupal\shortcut\ShortcutSetStorageController $shortcut_set_storage
    *   The shortcut_set storage controller.
    */
-  public function __construct($entity_type, array $entity_info, ShortcutSetStorageController $shortcut_set_storage) {
-    parent::__construct($entity_type, $entity_info);
+  public function __construct(EntityTypeInterface $entity_type, ShortcutSetStorageController $shortcut_set_storage) {
+    parent::__construct($entity_type);
     $this->shortcutSetStorage = $shortcut_set_storage;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function createInstance(ContainerInterface $container, $entity_type, array $entity_info) {
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
     return new static(
       $entity_type,
-      $entity_info,
       $container->get('entity.manager')->getStorageController('shortcut_set')
     );
   }

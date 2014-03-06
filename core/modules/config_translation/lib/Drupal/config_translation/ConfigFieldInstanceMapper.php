@@ -21,7 +21,7 @@ class ConfigFieldInstanceMapper extends ConfigEntityMapper {
   /**
    * Loaded entity instance to help produce the translation interface.
    *
-   * @var \Drupal\field\FieldInstanceInterface
+   * @var \Drupal\field\FieldInstanceConfigInterface
    */
   protected $entity;
 
@@ -31,7 +31,7 @@ class ConfigFieldInstanceMapper extends ConfigEntityMapper {
   public function getBaseRouteParameters() {
     $parameters = parent::getBaseRouteParameters();
     $base_entity_info = $this->entityManager->getDefinition($this->pluginDefinition['base_entity_type']);
-    $parameters[$base_entity_info['bundle_entity_type']] = $this->entity->targetBundle();
+    $parameters[$base_entity_info->getBundleEntityType()] = $this->entity->targetBundle();
     return $parameters;
   }
 
@@ -40,7 +40,7 @@ class ConfigFieldInstanceMapper extends ConfigEntityMapper {
    */
   public function getTypeLabel() {
     $base_entity_info = $this->entityManager->getDefinition($this->pluginDefinition['base_entity_type']);
-    return $this->t('@label fields', array('@label' => $base_entity_info['label']));
+    return $this->t('@label fields', array('@label' => $base_entity_info->getLabel()));
   }
 
 }

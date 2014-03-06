@@ -9,13 +9,13 @@ services:
     class: Drupal\config_translation\Access\ConfigTranslationOverviewAccess
     arguments: ['@plugin.manager.config_translation.mapper']
     tags:
-      - { name: access_check }
+      - { name: access_check, applies_to: _config_translation_overview_access }
 
   config_translation.access.form:
     class: Drupal\config_translation\Access\ConfigTranslationFormAccess
     arguments: ['@plugin.manager.config_translation.mapper']
     tags:
-      - { name: access_check }
+      - { name: access_check, applies_to: _config_translation_form_access }
 
   plugin.manager.config_translation.mapper:
     class: Drupal\config_translation\ConfigMapperManager
@@ -24,3 +24,4 @@ services:
       - '@language_manager'
       - '@module_handler'
       - '@config.typed'
+      - '@theme_handler'

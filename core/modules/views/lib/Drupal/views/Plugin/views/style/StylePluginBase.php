@@ -10,8 +10,6 @@ namespace Drupal\views\Plugin\views\style;
 use Drupal\views\Plugin\views\PluginBase;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\wizard\WizardInterface;
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 use Drupal\views\ViewExecutable;
 
 /**
@@ -39,7 +37,7 @@ abstract class StylePluginBase extends PluginBase {
   /**
    * Store all available tokens row rows.
    */
-  var $row_tokens = array();
+  protected $rowTokens = array();
 
   /**
    * Does the style plugin allows to use style plugins.
@@ -203,7 +201,7 @@ abstract class StylePluginBase extends PluginBase {
   public function tokenizeValue($value, $row_index) {
     if (strpos($value, '[') !== FALSE || strpos($value, '!') !== FALSE || strpos($value, '%') !== FALSE) {
       // Row tokens might be empty, for example for node row style.
-      $tokens = isset($this->row_tokens[$row_index]) ? $this->row_tokens[$row_index] : array();
+      $tokens = isset($this->rowTokens[$row_index]) ? $this->rowTokens[$row_index] : array();
       if (!empty($this->view->build_info['substitutions'])) {
         $tokens += $this->view->build_info['substitutions'];
       }
@@ -634,7 +632,7 @@ abstract class StylePluginBase extends PluginBase {
             $this->rendered_fields[$count][$id] = $this->view->field[$id]->theme($row);
           }
 
-          $this->row_tokens[$count] = $this->view->field[$id]->getRenderTokens(array());
+          $this->rowTokens[$count] = $this->view->field[$id]->getRenderTokens(array());
         }
       }
       unset($this->view->row_index);

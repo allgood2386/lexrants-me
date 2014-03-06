@@ -9,7 +9,8 @@ namespace Drupal\system\Tests\TypedData;
 
 use Drupal\Core\Field\FieldDefinition;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\Core\TypedData\ListDefinition;
+use Drupal\Core\TypedData\ListDataDefinition;
+use Drupal\Core\TypedData\MapDataDefinition;
 use Drupal\simpletest\DrupalUnitTestBase;
 use Drupal\Core\Datetime\DrupalDateTime;
 
@@ -23,7 +24,7 @@ class TypedDataTest extends DrupalUnitTestBase {
    *
    * @var \Drupal\Core\TypedData\TypedDataManager
    */
-  protected $typedData;
+  protected $typedDataManager;
 
   /**
    * Modules to enable.
@@ -44,7 +45,7 @@ class TypedDataTest extends DrupalUnitTestBase {
     parent::setup();
 
     $this->installSchema('file', array('file_managed', "file_usage"));
-    $this->typedData = $this->container->get('typed_data');
+    $this->typedDataManager = $this->container->get('typed_data_manager');
   }
 
   /**
@@ -56,7 +57,7 @@ class TypedDataTest extends DrupalUnitTestBase {
     if (is_array($definition)) {
       $definition = DataDefinition::create($definition['type']);
     }
-    $data = $this->typedData->create($definition, $value, $name);
+    $data = $this->typedDataManager->create($definition, $value, $name);
     $this->assertTrue($data instanceof \Drupal\Core\TypedData\TypedDataInterface, 'Typed data object is an instance of the typed data interface.');
     return $data;
   }
@@ -318,7 +319,7 @@ class TypedDataTest extends DrupalUnitTestBase {
   public function testTypedDataLists() {
     // Test working with an existing list of strings.
     $value = array('one', 'two', 'three');
-    $typed_data = $this->createTypedData(ListDefinition::create('string'), $value);
+    $typed_data = $this->createTypedData(ListDataDefinition::create('string'), $value);
     $this->assertEqual($typed_data->getValue(), $value, 'List value has been set.');
     // Test iterating.
     $count = 0;
@@ -410,9 +411,12 @@ class TypedDataTest extends DrupalUnitTestBase {
       'two' => 'zwei',
       'three' => 'drei',
     );
-    $typed_data = $this->createTypedData(array(
-      'type' => 'map',
-    ), $value);
+    $definition = MapDataDefinition::create()
+      ->setPropertyDefinition('one', DataDefinition::create('string'))
+      ->setPropertyDefinition('two', DataDefinition::create('string'))
+      ->setPropertyDefinition('three', DataDefinition::create('string'));
+
+    $typed_data = $this->createTypedData($definition, $value);
 
     // Test iterating.
     $count = 0;
@@ -423,10 +427,10 @@ class TypedDataTest extends DrupalUnitTestBase {
     $this->assertEqual($count, 3);
 
     // Test retrieving metadata.
-    $this->assertEqual(array_keys($typed_data->getPropertyDefinitions()), array_keys($value));
-    $definition = $typed_data->getPropertyDefinition('one');
-    $this->assertEqual($definition->getDataType(), 'any');
-    $this->assertFalse($typed_data->getPropertyDefinition('invalid'));
+    $this->assertEqual(array_keys($typed_data->getDataDefinition()->getPropertyDefinitions()), array_keys($value));
+    $definition = $typed_data->getDataDefinition()->getPropertyDefinition('one');
+    $this->assertEqual($definition->getDataType(), 'string');
+    $this->assertNull($typed_data->getDataDefinition()->getPropertyDefinition('invalid'));
 
     // Test getting and setting properties.
     $this->assertEqual($typed_data->get('one')->getValue(), 'eins');
@@ -450,8 +454,11 @@ class TypedDataTest extends DrupalUnitTestBase {
     $this->assertEqual($typed_data->get('two')->getValue(), 'zwei');
     $this->assertEqual($typed_data->get('three')->getValue(), 'drei');
 
+    // Test setting a not defined property. It shouldn't show up in the
+    // properties, but be kept in the values.
     $typed_data->setValue(array('foo' => 'bar'));
-    $this->assertEqual(array_keys($typed_data->getProperties()), array('foo'));
+    $this->assertEqual(array_keys($typed_data->getProperties()), array('one', 'two', 'three'));
+    $this->assertEqual(array_keys($typed_data->getValue()), array('foo', 'one', 'two', 'three'));
 
     // Test getting the string representation.
     $typed_data->setValue(array('one' => 'eins', 'two' => '', 'three' => 'drei'));
@@ -492,10 +499,11 @@ class TypedDataTest extends DrupalUnitTestBase {
       $this->pass('Exception thrown:' . $e->getMessage());
     }
 
-    // Test adding a new entry to the map.
+    // Test adding a new property to the map.
+    $typed_data->getDataDefinition()->setPropertyDefinition('zero', DataDefinition::create('any'));
     $typed_data->set('zero', 'null');
     $this->assertEqual($typed_data->get('zero')->getValue(), 'null');
-    $definition = $typed_data->getPropertyDefinition('zero');
+    $definition = $typed_data->get('zero')->getDataDefinition();
     $this->assertEqual($definition->getDataType(), 'any', 'Definition for a new map entry returned.');
   }
 
@@ -507,10 +515,10 @@ class TypedDataTest extends DrupalUnitTestBase {
       ->setConstraints(array(
         'Range' => array('min' => 5),
       ));
-    $violations = $this->typedData->create($definition, 10)->validate();
+    $violations = $this->typedDataManager->create($definition, 10)->validate();
     $this->assertEqual($violations->count(), 0);
 
-    $integer = $this->typedData->create($definition, 1);
+    $integer = $this->typedDataManager->create($definition, 1);
     $violations = $integer->validate();
     $this->assertEqual($violations->count(), 1);
 
@@ -525,7 +533,7 @@ class TypedDataTest extends DrupalUnitTestBase {
       ->setConstraints(array(
         'Length' => array('min' => 10),
       ));
-    $violations = $this->typedData->create($definition, "short")->validate();
+    $violations = $this->typedDataManager->create($definition, "short")->validate();
     $this->assertEqual($violations->count(), 1);
     $message = t('This value is too short. It should have %limit characters or more.', array('%limit' => 10));
     $this->assertEqual($violations[0]->getMessage(), $message, 'Translated violation message retrieved.');
@@ -536,46 +544,46 @@ class TypedDataTest extends DrupalUnitTestBase {
         'Range' => array('min' => 5),
         'Null' => array(),
       ));
-    $violations = $this->typedData->create($definition, 10)->validate();
+    $violations = $this->typedDataManager->create($definition, 10)->validate();
     $this->assertEqual($violations->count(), 1);
-    $violations = $this->typedData->create($definition, 1)->validate();
+    $violations = $this->typedDataManager->create($definition, 1)->validate();
     $this->assertEqual($violations->count(), 2);
 
     // Test validating property containers and make sure the NotNull and Null
     // constraints work with typed data containers.
     $definition = FieldDefinition::create('integer')
       ->setConstraints(array('NotNull' => array()));
-    $field_item = $this->typedData->create($definition, array('value' => 10));
+    $field_item = $this->typedDataManager->create($definition, array('value' => 10));
     $violations = $field_item->validate();
     $this->assertEqual($violations->count(), 0);
 
-    $field_item = $this->typedData->create($definition, array('value' => 'no integer'));
+    $field_item = $this->typedDataManager->create($definition, array('value' => 'no integer'));
     $violations = $field_item->validate();
     $this->assertEqual($violations->count(), 1);
     $this->assertEqual($violations[0]->getPropertyPath(), '0.value');
 
     // Test that the field item may not be empty.
-    $field_item = $this->typedData->create($definition);
+    $field_item = $this->typedDataManager->create($definition);
     $violations = $field_item->validate();
     $this->assertEqual($violations->count(), 1);
 
     // Test the Null constraint with typed data containers.
     $definition = FieldDefinition::create('float')
       ->setConstraints(array('Null' => array()));
-    $field_item = $this->typedData->create($definition, array('value' => 11.5));
+    $field_item = $this->typedDataManager->create($definition, array('value' => 11.5));
     $violations = $field_item->validate();
     $this->assertEqual($violations->count(), 1);
-    $field_item = $this->typedData->create($definition);
+    $field_item = $this->typedDataManager->create($definition);
     $violations = $field_item->validate();
     $this->assertEqual($violations->count(), 0);
 
     // Test getting constraint definitions by type.
-    $definitions = $this->typedData->getValidationConstraintManager()->getDefinitionsByType('entity');
+    $definitions = $this->typedDataManager->getValidationConstraintManager()->getDefinitionsByType('entity');
     $this->assertTrue(isset($definitions['EntityType']), 'Constraint plugin found for type entity.');
     $this->assertTrue(isset($definitions['Null']), 'Constraint plugin found for type entity.');
     $this->assertTrue(isset($definitions['NotNull']), 'Constraint plugin found for type entity.');
 
-    $definitions = $this->typedData->getValidationConstraintManager()->getDefinitionsByType('string');
+    $definitions = $this->typedDataManager->getValidationConstraintManager()->getDefinitionsByType('string');
     $this->assertFalse(isset($definitions['EntityType']), 'Constraint plugin not found for type string.');
     $this->assertTrue(isset($definitions['Null']), 'Constraint plugin found for type string.');
     $this->assertTrue(isset($definitions['NotNull']), 'Constraint plugin found for type string.');
@@ -583,17 +591,17 @@ class TypedDataTest extends DrupalUnitTestBase {
     // Test automatic 'required' validation.
     $definition = DataDefinition::create('integer')
       ->setRequired(TRUE);
-    $violations = $this->typedData->create($definition)->validate();
+    $violations = $this->typedDataManager->create($definition)->validate();
     $this->assertEqual($violations->count(), 1);
-    $violations = $this->typedData->create($definition, 0)->validate();
+    $violations = $this->typedDataManager->create($definition, 0)->validate();
     $this->assertEqual($violations->count(), 0);
 
     // Test validating a list of a values and make sure property paths starting
     // with "0" are created.
     $definition = FieldDefinition::create('integer');
-    $violations = $this->typedData->create($definition, array(array('value' => 10)))->validate();
+    $violations = $this->typedDataManager->create($definition, array(array('value' => 10)))->validate();
     $this->assertEqual($violations->count(), 0);
-    $violations = $this->typedData->create($definition, array(array('value' => 'string')))->validate();
+    $violations = $this->typedDataManager->create($definition, array(array('value' => 'string')))->validate();
     $this->assertEqual($violations->count(), 1);
 
     $this->assertEqual($violations[0]->getInvalidValue(), 'string');

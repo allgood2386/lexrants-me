@@ -264,7 +264,7 @@ class ModuleHandler implements ModuleHandlerInterface {
   /**
    * Implements \Drupal\Core\Extension\ModuleHandlerInterface::invoke().
    */
-  public function invoke($module, $hook, $args = array()) {
+  public function invoke($module, $hook, array $args = array()) {
     if (!$this->implementsHook($module, $hook)) {
       return;
     }
@@ -275,7 +275,7 @@ class ModuleHandler implements ModuleHandlerInterface {
   /**
    * Implements \Drupal\Core\Extension\ModuleHandlerInterface::invokeAll().
    */
-  public function invokeAll($hook, $args = array()) {
+  public function invokeAll($hook, array $args = array()) {
     $return = array();
     $implementations = $this->getImplementations($hook);
     foreach ($implementations as $module) {
@@ -426,7 +426,7 @@ class ModuleHandler implements ModuleHandlerInterface {
     $hook_info = $this->getHookInfo();
     foreach ($this->moduleList as $module => $filename) {
       $include_file = isset($hook_info[$hook]['group']) && $this->loadInclude($module, 'inc', $module . '.' . $hook_info[$hook]['group']);
-      // Since $this->hookImplements() may needlessly try to load the include
+      // Since $this->implementsHook() may needlessly try to load the include
       // file again, function_exists() is used directly here.
       if (function_exists($module . '_' . $hook)) {
         $this->implementations[$hook][$module] = $include_file ? $hook_info[$hook]['group'] : FALSE;
@@ -599,9 +599,10 @@ class ModuleHandler implements ModuleHandlerInterface {
         $this->load($module);
         module_load_install($module);
 
-        // Flush theme info caches, since (testing) modules can implement
-        // hook_system_theme_info() to register additional themes.
-        system_list_reset();
+        // Clear the static cache of system_rebuild_module_data() to pick up the
+        // new module, since it merges the installation status of modules into
+        // its statically cached list.
+        drupal_static_reset('system_rebuild_module_data');
 
         // Update the kernel to include it.
         // This reboots the kernel to register the module's bundle and its
@@ -627,13 +628,16 @@ class ModuleHandler implements ModuleHandlerInterface {
         // Now install the module's schema if necessary.
         drupal_install_schema($module);
 
-        // Set the schema version to the number of the last update provided
-        // by the module.
+        // Set the schema version to the number of the last update provided by
+        // the module, or the minimum core schema version.
+        $version = \Drupal::CORE_MINIMUM_SCHEMA_VERSION;
         $versions = drupal_get_schema_versions($module);
-        $version = $versions ? max($versions) : SCHEMA_INSTALLED;
+        if ($versions) {
+          $version = max(max($versions), $version);
+        }
 
         // Install default configuration of the module.
-        config_install_default_config('module', $module);
+        \Drupal::service('config.installer')->installDefaultConfig('module', $module);
 
         // If the module has no current updates, but has some that were
         // previously removed, set the version to the value of
@@ -723,11 +727,11 @@ class ModuleHandler implements ModuleHandlerInterface {
       $this->invoke($module, 'uninstall');
       drupal_uninstall_schema($module);
 
-      // Remove all configuration belonging to the module.
-      config_uninstall_default_config('module', $module);
-
       // Remove the module's entry from the config.
       $module_config->clear("enabled.$module")->save();
+
+      // Remove all configuration belonging to the module.
+      \Drupal::service('config.manager')->uninstall('module', $module);
 
       // Update the module handler to remove the module.
       // The current ModuleHandler instance is obsolete with the kernel rebuild
@@ -739,10 +743,10 @@ class ModuleHandler implements ModuleHandlerInterface {
       // Remove any potential cache bins provided by the module.
       $this->removeCacheBins($module);
 
-      // Refresh the system list to exclude the uninstalled modules.
-      // @todo Only needed to rebuild theme info.
-      // @see system_list_reset()
-      system_list_reset();
+      // Clear the static cache of system_rebuild_module_data() to pick up the
+      // new module, since it merges the installation status of modules into
+      // its statically cached list.
+      drupal_static_reset('system_rebuild_module_data');
 
       // Clear the entity info cache.
       entity_info_cache_clear();
@@ -756,6 +760,9 @@ class ModuleHandler implements ModuleHandlerInterface {
       watchdog('system', '%module module uninstalled.', array('%module' => $module), WATCHDOG_INFO);
 
       $schema_store->delete($module);
+
+      // Make sure any route data is also removed for this module.
+      \Drupal::service('router.dumper')->dump(array('provider' => $module));
     }
     drupal_get_installed_schema_version(NULL, TRUE);
 

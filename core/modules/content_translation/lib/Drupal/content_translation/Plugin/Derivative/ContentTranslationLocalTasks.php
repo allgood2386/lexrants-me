@@ -8,14 +8,14 @@
 namespace Drupal\content_translation\Plugin\Derivative;
 
 use Drupal\content_translation\ContentTranslationManagerInterface;
-use Drupal\Core\Menu\LocalTaskDerivativeBase;
+use Drupal\Component\Plugin\Derivative\DerivativeBase;
 use Drupal\Core\Plugin\Discovery\ContainerDerivativeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides dynamic local tasks for content translation.
  */
-class ContentTranslationLocalTasks extends LocalTaskDerivativeBase implements ContainerDerivativeInterface {
+class ContentTranslationLocalTasks extends DerivativeBase implements ContainerDerivativeInterface {
 
   /**
    * The base plugin ID
@@ -59,33 +59,18 @@ class ContentTranslationLocalTasks extends LocalTaskDerivativeBase implements Co
    */
   public function getDerivativeDefinitions(array $base_plugin_definition) {
     // Create tabs for all possible entity types.
-    foreach ($this->contentTranslationManager->getSupportedEntityTypes() as $entity_type => $entity_info) {
+    foreach ($this->contentTranslationManager->getSupportedEntityTypes() as $entity_type_id => $entity_type) {
       // Find the route name for the translation overview.
-      $translation_route_name = $entity_info['links']['drupal:content-translation-overview'];
+      $translation_route_name = $entity_type->getLinkTemplate('drupal:content-translation-overview');
 
       $this->derivatives[$translation_route_name] = array(
-        'entity_type' => $entity_type,
+        'entity_type' => $entity_type_id,
         'title' => 'Translate',
         'route_name' => $translation_route_name,
+        'base_route' => $entity_type->getLinkTemplate('canonical'),
       ) + $base_plugin_definition;
     }
     return parent::getDerivativeDefinitions($base_plugin_definition);
-  }
-
-  /**
-   * Alters the local tasks to find the proper tab_root_id for each task.
-   */
-  public function alterLocalTasks(array &$local_tasks) {
-    foreach ($this->contentTranslationManager->getSupportedEntityTypes() as $entity_info) {
-      // Find the route name for the entity page.
-      $entity_route_name = $entity_info['links']['canonical'];
-
-      // Find the route name for the translation overview.
-      $translation_route_name = $entity_info['links']['drupal:content-translation-overview'];
-      $translation_tab = $this->basePluginId . ':' . $translation_route_name;
-
-      $local_tasks[$translation_tab]['tab_root_id'] = $this->getPluginIdFromRoute($entity_route_name, $local_tasks);
-    }
   }
 
 }

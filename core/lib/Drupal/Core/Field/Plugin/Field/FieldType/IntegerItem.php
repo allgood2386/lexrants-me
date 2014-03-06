@@ -7,6 +7,7 @@
 
 namespace Drupal\Core\Field\Plugin\Field\FieldType;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\TypedData\DataDefinition;
 
@@ -23,23 +24,27 @@ use Drupal\Core\TypedData\DataDefinition;
 class IntegerItem extends FieldItemBase {
 
   /**
-   * Definitions of the contained properties.
-   *
-   * @see IntegerItem::getPropertyDefinitions()
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  static $propertyDefinitions;
+  public static function propertyDefinitions(FieldDefinitionInterface $field_definition) {
+    $properties['value'] = DataDefinition::create('integer')
+      ->setLabel(t('Integer value'));
+
+    return $properties;
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function getPropertyDefinitions() {
-
-    if (!isset(static::$propertyDefinitions)) {
-      static::$propertyDefinitions['value'] = DataDefinition::create('integer')
-        ->setLabel(t('Integer value'));
-    }
-    return static::$propertyDefinitions;
+  public static function schema(FieldDefinitionInterface $field_definition) {
+    return array(
+      'columns' => array(
+        'value' => array(
+          'type' => 'int',
+          'not null' => TRUE,
+        ),
+      ),
+    );
   }
+
 }

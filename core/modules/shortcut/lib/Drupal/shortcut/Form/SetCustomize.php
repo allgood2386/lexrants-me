@@ -8,7 +8,7 @@
 namespace Drupal\shortcut\Form;
 
 use Drupal\Core\Entity\EntityFormController;
-use Drupal\Core\Entity\EntityManager;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -26,10 +26,10 @@ class SetCustomize extends EntityFormController {
   /**
    * Constructs a SetCustomize object.
    *
-   * @param \Drupal\Core\Entity\EntityManager $entity_manager
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
    */
-  public function __construct(EntityManager $entity_manager) {
+  public function __construct(EntityManagerInterface $entity_manager) {
     $this->storageController = $entity_manager->getStorageController('shortcut');
   }
 
@@ -58,7 +58,11 @@ class SetCustomize extends EntityFormController {
       '#empty' => $this->t('No shortcuts available. <a href="@link">Add a shortcut</a>', array('@link' => $this->urlGenerator()->generateFromRoute('shortcut.link_add', array('shortcut_set' => $this->entity->id())))),
       '#attributes' => array('id' => 'shortcuts'),
       '#tabledrag' => array(
-        array('order', 'sibling', 'shortcut-weight'),
+        array(
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'shortcut-weight',
+        ),
       ),
     );
 
@@ -66,13 +70,13 @@ class SetCustomize extends EntityFormController {
     foreach ($shortcuts as $shortcut) {
       $id = $shortcut->id();
       $form['shortcuts']['links'][$id]['#attributes']['class'][] = 'draggable';
-      $form['shortcuts']['links'][$id]['name']['#markup'] = l($shortcut->title->value, $shortcut->path->value);
-      $form['shortcuts']['links'][$id]['#weight'] = $shortcut->weight->value;
+      $form['shortcuts']['links'][$id]['name']['#markup'] = l($shortcut->getTitle(), $shortcut->path->value);
+      $form['shortcuts']['links'][$id]['#weight'] = $shortcut->getWeight();
       $form['shortcuts']['links'][$id]['weight'] = array(
         '#type' => 'weight',
-        '#title' => t('Weight for @title', array('@title' => $shortcut->title->value)),
+        '#title' => t('Weight for @title', array('@title' => $shortcut->getTitle())),
         '#title_display' => 'invisible',
-        '#default_value' => $shortcut->weight->value,
+        '#default_value' => $shortcut->getWeight(),
         '#attributes' => array('class' => array('shortcut-weight')),
       );
 
@@ -117,7 +121,7 @@ class SetCustomize extends EntityFormController {
   public function save(array $form, array &$form_state) {
     $shortcuts = $this->storageController->loadByProperties(array('shortcut_set' => $this->entity->id()));
     foreach ($shortcuts as $shortcut) {
-      $shortcut->weight->value = $form_state['values']['shortcuts']['links'][$shortcut->id()]['weight'];
+      $shortcut->setWeight($form_state['values']['shortcuts']['links'][$shortcut->id()]['weight']);
       $shortcut->save();
     }
     drupal_set_message(t('The shortcut set has been updated.'));

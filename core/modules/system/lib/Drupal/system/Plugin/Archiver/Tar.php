@@ -2,19 +2,17 @@
 
 /**
  * @file
- * Contains \Drupal\system\Plugin\Core\Archiver\Tar.
+ * Contains \Drupal\system\Plugin\Archiver\Tar.
  */
 
 namespace Drupal\system\Plugin\Archiver;
 
 use Drupal\Component\Archiver\Tar as BaseTar;
-use Drupal\Component\Annotation\Plugin;
-use Drupal\Core\Annotation\Translation;
 
 /**
- * Defines a archiver implementation for .tar files.
+ * Defines an archiver implementation for .tar files.
  *
- * @Plugin(
+ * @Archiver(
  *   id = "Tar",
  *   title = @Translation("Tar"),
  *   description = @Translation("Handles .tar files."),
